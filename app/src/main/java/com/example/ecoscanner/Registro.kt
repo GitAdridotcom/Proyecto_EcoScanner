@@ -1,5 +1,6 @@
 package com.example.ecoscanner
 
+import android.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,10 +34,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Preview (showBackground = true)
 @Composable
 
-fun Registro(){
+fun Registro(onClickInici: () -> Unit){
     var correo by remember { mutableStateOf("") }
 
     var contraseña by remember { mutableStateOf("") }
@@ -46,7 +46,7 @@ fun Registro(){
         Column(
             modifier = Modifier .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
         ) {
-
+            Image(painter = painterResource(com.example.ecoscanner.R.drawable.logo), contentDescription = "", Modifier.scale(2f))
             Spacer(modifier = Modifier .height(40.dp))
             Text("Asistent de Petjada de Transport i Km 0", modifier = Modifier .width(150.dp), textAlign = TextAlign.Center)
             Spacer(modifier = Modifier .height(20.dp))
@@ -54,13 +54,13 @@ fun Registro(){
             Spacer(modifier = Modifier .height(20.dp))
             OutlinedTextField(value = contraseña, onValueChange = {contraseña = it}, placeholder = {Text("Pon tu contraseña aqui")})
             Spacer(modifier = Modifier .height(20.dp))
-            Button(onClick = {}, modifier = Modifier .width(280.dp)) {
+            Button(onClick = {/*onClickRegistrarse*/}, modifier = Modifier .width(280.dp)) {
                 Text("Registrarse")
             }
             Spacer(modifier = Modifier .height(10.dp))
             Row( modifier = Modifier .width(200.dp),horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Ja tinc compte")
-                Text("Iniciar Sesió", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = {/*Navegacion a la pantalla inicio sesión*/}))
+                Text("Iniciar Sesió", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickInici() }))
 
             }
         }

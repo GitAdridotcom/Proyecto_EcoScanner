@@ -1,5 +1,5 @@
 package com.example.ecoscanner
-import com.example.ecoscanner.R
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,10 +33,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Preview (showBackground = true)
 @Composable
 
-fun InicioSesion(){
+fun InicioSesion(onClickRegistrarme: () -> Unit){
     var correo by remember { mutableStateOf("") }
 
     var contraseña by remember { mutableStateOf("") }
@@ -61,7 +60,7 @@ fun InicioSesion(){
             Spacer(modifier = Modifier .height(10.dp))
             Row( modifier = Modifier .width(180.dp),horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("No tinc compte")
-                Text("Registrarme", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = {})) }
+                Text("Registrarme", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickRegistrarme() })) }
         }
     }
 }
