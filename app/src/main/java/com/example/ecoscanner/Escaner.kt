@@ -1,6 +1,5 @@
 package com.example.ecoscanner
 
-import android.text.Layout
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,22 +13,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Preview(showBackground = true)
+
 @Composable
-fun EscanerPreview() {
-    Escaner(onClickEsta = {})
-}
-@Composable
-fun Escaner(onClickEsta: () -> Unit) {
+fun Escaner(onClickEstadisticas: () -> Unit) {
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
@@ -53,7 +46,7 @@ fun Escaner(onClickEsta: () -> Unit) {
                     NavigationDrawerItem(
                         label = { Text("Estadisticas") },
                         selected = false,
-                        onClick = { /* ... */ }
+                        onClick = { onClickEstadisticas()}
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -77,13 +70,13 @@ fun Escaner(onClickEsta: () -> Unit) {
                         onClick = { /* ... */ }
                     )
 
-                    Spacer(modifier = Modifier.weight(1f)) // Empuja el botón hacia abajo
+                    Spacer(modifier = Modifier.weight(1f))
 
                     Button(
                         onClick = {/**/},
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                     ) {
-                        Text("Tancar Sessió")
+                        Text("Cerrar Sesión")
                     }
                 }
             }
@@ -96,7 +89,7 @@ fun Escaner(onClickEsta: () -> Unit) {
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Desliza para ver el menú", modifier = Modifier.padding(16.dp))
+                Text("Desliza aquí hacia la derecha para ver el menú", modifier = Modifier.padding(16.dp))
 
                 // Box para el logo con un tamaño definido
                 Box(
@@ -104,7 +97,7 @@ fun Escaner(onClickEsta: () -> Unit) {
                         .width(350.dp)
                         .height(600.dp)
                         .clip(RoundedCornerShape(25.dp))
-                        .background(Color.LightGray)
+                        .background(Color(0xFFE8F5E9))
                         .padding(20.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -115,7 +108,7 @@ fun Escaner(onClickEsta: () -> Unit) {
                     )
 
                     Row(modifier = Modifier .fillMaxWidth() .fillMaxHeight(), horizontalArrangement = Arrangement.Start, Alignment.Top) {
-                        Box(modifier = Modifier .width(100.dp) .height(50.dp) .background(Color.Green) .padding(10.dp),
+                        Box(modifier = Modifier .width(100.dp) .height(50.dp) .background(Color(0xFF388E3C)) .padding(10.dp),
                             Alignment.TopStart){
                             Text("Ubicació: ", color = Color.White)
                         }

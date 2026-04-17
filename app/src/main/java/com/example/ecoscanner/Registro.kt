@@ -33,34 +33,39 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 
-fun Registro(onClickInici: () -> Unit){
+fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit){
     var correo by remember { mutableStateOf("") }
 
     var contraseña by remember { mutableStateOf("") }
 
-    Box(modifier = Modifier .fillMaxSize() .background(Color.White)){
+    Box(modifier = Modifier.fillMaxSize().background(
+        brush = Brush.verticalGradient(
+            colors = listOf(Color(0xFF4CAF50), Color(0xFFFFFFFF))
+        )
+    )){
 
         Column(
             modifier = Modifier .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
         ) {
             Image(painter = painterResource(com.example.ecoscanner.R.drawable.logo), contentDescription = "", Modifier.scale(2f))
             Spacer(modifier = Modifier .height(40.dp))
-            Text("Asistent de Petjada de Transport i Km 0", modifier = Modifier .width(150.dp), textAlign = TextAlign.Center)
+            Text(" Tu asistente de huella de transporte y Km 0", modifier = Modifier .width(150.dp), textAlign = TextAlign.Center)
             Spacer(modifier = Modifier .height(20.dp))
-            OutlinedTextField(value = correo, onValueChange = {correo = it}, placeholder = {Text("Pon tu correo aqui")})
+            OutlinedTextField(value = correo, onValueChange = {correo = it}, placeholder = {Text("Introduce tu correo aquí")})
             Spacer(modifier = Modifier .height(20.dp))
-            OutlinedTextField(value = contraseña, onValueChange = {contraseña = it}, placeholder = {Text("Pon tu contraseña aqui")})
+            OutlinedTextField(value = contraseña, onValueChange = {contraseña = it}, placeholder = {Text("Introduce tu contraseña aquí")})
             Spacer(modifier = Modifier .height(20.dp))
-            Button(onClick = {/*onClickRegistrarse*/}, modifier = Modifier .width(280.dp)) {
+            Button(onClick = { onClickRegistrarse() }, modifier = Modifier .width(280.dp)) {
                 Text("Registrarse")
             }
             Spacer(modifier = Modifier .height(10.dp))
             Row( modifier = Modifier .width(200.dp),horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Ja tinc compte")
-                Text("Iniciar Sesió", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickInici() }))
+                Text("Ya tengo una cuenta")
+                Text("Iniciar Sesión", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickInici() }))
 
             }
         }

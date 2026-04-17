@@ -16,20 +16,30 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            App() }
+            EcoscannerTheme {
+                App()
+            }
+        }
     }
 }
+
 @Composable
 fun App() {
     var paginaSeleccionada by remember { mutableStateOf("Registro") }
 
     if (paginaSeleccionada == "Registro") {
-        Registro(onClickInici = { paginaSeleccionada = "InicioSesion" })
+        Registro(
+            onClickInici = { paginaSeleccionada = "InicioSesion" },
+            onClickRegistrarse = { paginaSeleccionada = "escaner" }
+        )
     } else if (paginaSeleccionada == "InicioSesion") {
-        InicioSesion(onClickRegistrarme = { paginaSeleccionada = "Registro" })
+        InicioSesion(
+            onClickRegistrarme = { paginaSeleccionada = "Registro" },
+            onClickIniciar = { paginaSeleccionada = "escaner" }
+        )
     } else if (paginaSeleccionada == "escaner") {
-        Escaner(onClickEsta = { paginaSeleccionada = "Esta" })
-    } else if (paginaSeleccionada == "Esta") {
-        Esta(onTornar = { paginaSeleccionada = "escaner" })
+        Escaner(onClickEstadisticas = { paginaSeleccionada = "Estadisticas" })
+    } else if (paginaSeleccionada == "Estadisticas") {
+        Estadisticas(onVolverEscaner = { paginaSeleccionada = "escaner" })
     }
 }
