@@ -19,22 +19,17 @@ class MainActivity : ComponentActivity() {
             App() }
     }
 }
-
 @Composable
 fun App() {
-    var pantallaActual by remember { mutableStateOf("registro") }
+    var paginaSeleccionada by remember { mutableStateOf("Registro") }
 
-    when (pantallaActual) {
-        "registro" -> {
-            Registro(
-                onClickInici = { pantallaActual = "inicioSesion" }
-            )
-        }
-
-        "inicioSesion" -> {
-            InicioSesion(
-                onClickRegistrarme = { pantallaActual = "registro" }
-            )
-        }
+    if (paginaSeleccionada == "Registro") {
+        Registro(onClickInici = { paginaSeleccionada = "InicioSesion" })
+    } else if (paginaSeleccionada == "InicioSesion") {
+        InicioSesion(onClickRegistrarme = { paginaSeleccionada = "Registro" })
+    } else if (paginaSeleccionada == "escaner") {
+        Escaner(onClickEsta = { paginaSeleccionada = "Esta" })
+    } else if (paginaSeleccionada == "Esta") {
+        Esta(onTornar = { paginaSeleccionada = "escaner" })
     }
 }

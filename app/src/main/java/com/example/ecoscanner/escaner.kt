@@ -23,8 +23,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+@Preview(showBackground = true)
 @Composable
 fun EscanerPreview() {
+    Escaner(onClickEsta = {})
+}
+@Composable
+fun Escaner(onClickEsta: () -> Unit) {
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {

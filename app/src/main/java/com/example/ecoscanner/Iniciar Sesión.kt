@@ -39,7 +39,6 @@ fun InicioSesion(onClickRegistrarme: () -> Unit){
     var correo by remember { mutableStateOf("") }
 
     var contraseña by remember { mutableStateOf("") }
-
     Box(modifier = Modifier .fillMaxSize() .background(Color.White)){
 
         Column(
