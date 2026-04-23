@@ -33,7 +33,7 @@ import kotlinx.serialization.json.put
 // Inicialización de Supabase (Global)
 val supabase = createSupabaseClient(
     supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
-    supabaseKey = "TU_KEY_AQUI"
+    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1b2RyaXlvb3N2dXh3Y2x6Y3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDE2NTIsImV4cCI6MjA5MTkxNzY1Mn0.uA6cD3fFASdSTD-AEaHsgrFCK_ryuphZJ3IpfNLPEes"
 ) {
     install(Auth)
     install(Postgrest)
@@ -143,7 +143,13 @@ fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
                             scope.launch {
                                 cargando = true
                                 val exito = registrouser(correo, contraseña)
-                                if (exito) onClickRegistrarse()
+                                if (exito) {
+                                    onClickRegistrarse()
+                                    supabase.auth.signUpWith(Email) {
+                                        email = correo
+                                        password = contraseña
+                                    }
+                                }
                                 else mensaje = "Error al crear la cuenta"
                                 cargando = false
                             }
