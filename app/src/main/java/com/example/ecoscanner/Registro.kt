@@ -1,72 +1,177 @@
 package com.example.ecoscanner
 
-import android.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.Brush
+// --- IMPORTS DE SUPABASE CORRECTOS ---
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email // Ruta exacta para el proveedor
+import io.github.jan.supabase.postgrest.Postgrest
+// --- OTROS ---
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
+// Inicialización de Supabase (Global)
+val supabase = createSupabaseClient(
+    supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
+    supabaseKey = "TU_KEY_AQUI"
+) {
+    install(Auth)
+    install(Postgrest)
+}
+
+/**
+ * Lógica de Registro corregida para Supabase-kt 2.x
+ */
+suspend fun registrouser(emailUser: String, passUser: String): Boolean {
+    return try {
+        // La sintaxis correcta es signUpWith(Email) y dentro pasar email y password
+        supabase.auth.signUpWith(Email) {
+            email = emailUser
+            password = passUser
+            // Los metadatos van en el campo 'data'
+            data = buildJsonObject {
+                put("display_name", "Usuario Eco")
+            }
+        }
+        true
+    } catch (e: Exception) {
+        // Log para debug
+        println("Error detallado en Registro: ${e.localizedMessage}")
+        false
+    }
+}
 
 @Composable
-
-fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit){
+fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
     var correo by remember { mutableStateOf("") }
-
     var contraseña by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var mensaje by remember { mutableStateOf("") }
+    var cargando by remember { mutableStateOf(false) }
+    val auth = supabase.auth;
 
-    Box(modifier = Modifier.fillMaxSize().background(
-        brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFF4CAF50), Color(0xFFFFFFFF))
-        )
-    )){
 
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF4CAF50), Color(0xFFFFFFFF))
+                )
+            )
+    ) {
         Column(
-            modifier = Modifier .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Image(painter = painterResource(com.example.ecoscanner.R.drawable.logo), contentDescription = "", Modifier.scale(2f))
-            Spacer(modifier = Modifier .height(40.dp))
-            Text(" Tu asistente de huella de transporte y Km 0", modifier = Modifier .width(150.dp), textAlign = TextAlign.Center)
-            Spacer(modifier = Modifier .height(20.dp))
-            OutlinedTextField(value = correo, onValueChange = {correo = it}, placeholder = {Text("Introduce tu correo aquí")})
-            Spacer(modifier = Modifier .height(20.dp))
-            OutlinedTextField(value = contraseña, onValueChange = {contraseña = it}, placeholder = {Text("Introduce tu contraseña aquí")})
-            Spacer(modifier = Modifier .height(20.dp))
-            Button(onClick = { onClickRegistrarse() }, modifier = Modifier .width(280.dp)) {
-                Text("Registrarse")
-            }
-            Spacer(modifier = Modifier .height(10.dp))
-            Row( modifier = Modifier .width(200.dp),horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Ya tengo una cuenta")
-                Text("Iniciar Sesión", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickInici() }))
+            // Logo (Asegúrate de que el ID R.drawable.logo sea el de tu proyecto)
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Logo EcoScanner",
+                modifier = Modifier.scale(2f)
+            )
 
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Text(
+                text = "Tu asistente de huella de transporte y Km 0",
+                modifier = Modifier.width(200.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            OutlinedTextField(
+                value = correo,
+                onValueChange = { correo = it },
+                label = { Text("Correo electrónico") },
+                singleLine = true,
+                modifier = Modifier.width(300.dp)
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            OutlinedTextField(
+                value = contraseña,
+                onValueChange = { contraseña = it },
+                label = { Text("Contraseña") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                modifier = Modifier.width(300.dp)
+            )
+
+            if (mensaje.isNotEmpty()) {
+                Text(
+                    text = mensaje,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            if (cargando) {
+                CircularProgressIndicator(color = Color(0xFF1B5E20))
+            } else {
+                Button(
+                    onClick = {
+                        if (correo.isNotBlank() && contraseña.isNotBlank()) {
+                            scope.launch {
+                                cargando = true
+                                val exito = registrouser(correo, contraseña)
+                                if (exito) onClickRegistrarse()
+                                else mensaje = "Error al crear la cuenta"
+                                cargando = false
+                            }
+                        } else {
+                            mensaje = "Rellena todos los campos"
+                        }
+                    },
+                    modifier = Modifier.width(280.dp)
+                ) {
+                    Text("Registrarse")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Row(
+                modifier = Modifier.width(280.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text("Ya tengo una cuenta. ")
+                Text(
+                    text = "Iniciar Sesión",
+                    style = TextStyle(
+                        textDecoration = TextDecoration.Underline,
+                        color = Color(0xFF1B5E20)
+                    ),
+                    modifier = Modifier.clickable { onClickInici() }
+                )
             }
         }
     }
