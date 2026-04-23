@@ -39,10 +39,7 @@ val supabase = createSupabaseClient(
     install(Postgrest)
 }
 
-/**
- * Lógica de Registro optimizada.
- * Devuelve un Result para manejar errores específicos.
- */
+
 suspend fun registrouser(emailUser: String, passUser: String): Result<Unit> {
     return try {
         supabase.auth.signUpWith(Email) {
