@@ -19,11 +19,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-// --- IMPORTS DE SUPABASE CORRECTOS ---
+// --- IMPORTS DE SUPABASE ---
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email // Ruta exacta para el proveedor
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.Postgrest
 // --- OTROS ---
 import kotlinx.coroutines.launch
@@ -40,24 +40,21 @@ val supabase = createSupabaseClient(
 }
 
 /**
- * Lógica de Registro corregida para Supabase-kt 2.x
+ * Lógica de Registro optimizada.
+ * Devuelve un Result para manejar errores específicos.
  */
-suspend fun registrouser(emailUser: String, passUser: String): Boolean {
+suspend fun registrouser(emailUser: String, passUser: String): Result<Unit> {
     return try {
-        // La sintaxis correcta es signUpWith(Email) y dentro pasar email y password
         supabase.auth.signUpWith(Email) {
             email = emailUser
             password = passUser
-            // Los metadatos van en el campo 'data'
             data = buildJsonObject {
                 put("display_name", "Usuario Eco")
             }
         }
-        true
+        Result.success(Unit)
     } catch (e: Exception) {
-        // Log para debug
-        println("Error detallado en Registro: ${e.localizedMessage}")
-        false
+        Result.failure(e)
     }
 }
 
@@ -68,9 +65,6 @@ fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
     val scope = rememberCoroutineScope()
     var mensaje by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
-    val auth = supabase.auth;
-
-
 
     Box(
         modifier = Modifier
@@ -86,7 +80,6 @@ fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo (Asegúrate de que el ID R.drawable.logo sea el de tu proyecto)
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo EcoScanner",
@@ -128,7 +121,8 @@ fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
                 Text(
                     text = mensaje,
                     color = Color.Red,
-                    modifier = Modifier.padding(top = 8.dp)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp, start = 20.dp, end = 20.dp)
                 )
             }
 
@@ -142,16 +136,22 @@ fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
                         if (correo.isNotBlank() && contraseña.isNotBlank()) {
                             scope.launch {
                                 cargando = true
-                                val exito = registrouser(correo, contraseña)
-                                if (exito) {
+                                mensaje = "" // Limpiar errores previos
+
+                                val resultado = registrouser(correo.trim(), contraseña.trim())
+
+                                resultado.onSuccess {
+                                    cargando = false
                                     onClickRegistrarse()
-                                    supabase.auth.signUpWith(Email) {
-                                        email = correo
-                                        password = contraseña
+                                }.onFailure { error ->
+                                    cargando = false
+                                    // Manejo de errores amigable
+                                    mensaje = when {
+                                        error.message?.contains("short") == true -> "Contraseña demasiado corta (mín. 6)"
+                                        error.message?.contains("already") == true -> "Este correo ya está registrado"
+                                        else -> "Error: ${error.localizedMessage ?: "Fallo al conectar con el servidor"}"
                                     }
                                 }
-                                else mensaje = "Error al crear la cuenta"
-                                cargando = false
                             }
                         } else {
                             mensaje = "Rellena todos los campos"

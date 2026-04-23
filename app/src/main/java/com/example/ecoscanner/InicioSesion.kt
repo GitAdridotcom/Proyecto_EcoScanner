@@ -29,10 +29,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Brush
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+
+// --- IMPORTS DE SUPABASE ---
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+// --- OTROS ---
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+
 @Composable
 
 fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit){
     var correo by remember { mutableStateOf("") }
+
+    val supabase = createSupabaseClient(
+        supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
+        supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1b2RyaXlvb3N2dXh3Y2x6Y3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDE2NTIsImV4cCI6MjA5MTkxNzY1Mn0.uA6cD3fFASdSTD-AEaHsgrFCK_ryuphZJ3IpfNLPEes"
+    ) {
+        install(Auth)
+        install(Postgrest)
+    }
 
     var contraseña by remember { mutableStateOf("") }
     Box(modifier = Modifier.fillMaxSize().background(
@@ -59,7 +79,7 @@ fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit){
             Spacer(modifier = Modifier .height(10.dp))
             Row( modifier = Modifier .width(180.dp),horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("No tinc compte")
-                Text("Registrarme", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickRegistrarme() })) }
+                Text("Registrarme", style = TextStyle(textDecoration = TextDecoration.Underline), modifier = Modifier .clickable(onClick = { onClickRegistrarme()})) }
         }
     }
 }
