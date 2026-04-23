@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun Escaner(onClickEstadisticas: () -> Unit) {
+fun Escaner(onClickEstadisticas: () -> Unit, onClickCamaraGps: () -> Unit) {
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
@@ -45,7 +45,7 @@ fun Escaner(onClickEstadisticas: () -> Unit) {
                     NavigationDrawerItem(
                         label = { Text("Estadisticas") },
                         selected = false,
-                        onClick = { onClickEstadisticas()}
+                        onClick = { onClickEstadisticas() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -106,17 +106,35 @@ fun Escaner(onClickEstadisticas: () -> Unit) {
                         modifier = Modifier.size(150.dp)
                     )
 
-                    Row(modifier = Modifier .fillMaxWidth() .fillMaxHeight(), horizontalArrangement = Arrangement.Start, Alignment.Top) {
-                        Box(modifier = Modifier .width(100.dp) .height(50.dp) .background(Color(0xFF388E3C)) .padding(10.dp),
-                            Alignment.TopStart){
+                    Row(
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Box(
+                            modifier = Modifier.width(100.dp).height(50.dp).background(Color(0xFF388E3C)).padding(10.dp),
+                            contentAlignment = Alignment.TopStart
+                        ) {
                             Text("Ubicació: ", color = Color.White)
                         }
                     }
                 }
-                Spacer(modifier = Modifier .height(50.dp))
-                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier .fillMaxWidth()) {
-                    Box(modifier = Modifier .width(200.dp) .height(100.dp), Alignment.Center){
-                        Image(painterResource(R.drawable.cameraa), contentDescription = "", contentScale = ContentScale.Fit)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(onClick = { onClickCamaraGps() }) {
+                    Text("Abrir cámara y GPS")
+                }
+
+                Spacer(modifier = Modifier.height(26.dp))
+
+                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.width(200.dp).height(100.dp), contentAlignment = Alignment.Center) {
+                        Image(
+                            painter = painterResource(R.drawable.cameraa),
+                            contentDescription = "",
+                            contentScale = ContentScale.Fit
+                        )
                     }
                 }
             }

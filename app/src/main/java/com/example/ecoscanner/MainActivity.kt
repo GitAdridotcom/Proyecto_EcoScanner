@@ -53,10 +53,16 @@ fun App() {
             )
         }
         "escaner" -> {
-            Escaner(onClickEstadisticas = { paginaSeleccionada = "Estadisticas" })
+            Escaner(
+                onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
+                onClickCamaraGps = { paginaSeleccionada = "PantallaCamera" }
+            )
         }
         "Estadisticas" -> {
             Estadisticas(onVolverEscaner = { paginaSeleccionada = "escaner" })
+        }
+        "PantallaCamera" -> {
+            PantallaCamera(onTornar = { paginaSeleccionada = "escaner" })
         }
     }
 }
