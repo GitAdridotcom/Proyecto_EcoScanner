@@ -120,8 +120,6 @@ fun Escaner(onClickEstadisticas: () -> Unit) {
                         Image(painterResource(R.drawable.cameraa), contentDescription = "", contentScale = ContentScale.Fit)
                     }
                 }
-
-
             }
         }
     }
