@@ -83,6 +83,11 @@ class MainActivity : ComponentActivity() {
                     }
                     if (product != null && product.isScanned) {
                         ProductRepository.updateProduct(product)
+
+                        val co2Saved = product.carbonFootprint ?: (product.nutriments.calories ?: 0.0) * 0.01
+                        val kmReduced = co2Saved / 0.12
+                        CarbonFootprintTracker.addScan(co2Saved, kmReduced)
+
                         NavigationState.currentPage = "escaner"
                         setContent {
                             EcoscannerTheme {

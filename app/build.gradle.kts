@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.compose.animation.core.lint)
 
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation(libs.transportation.consumer)
 
     val ktor_version = "3.0.0"
     implementation("io.ktor:ktor-client-core:$ktor_version")
