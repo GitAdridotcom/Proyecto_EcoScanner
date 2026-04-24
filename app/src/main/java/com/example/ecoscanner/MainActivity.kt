@@ -1,31 +1,100 @@
+@file:Suppress("UNUSED_PARAMETER")
 package com.example.ecoscanner
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.example.ecoscanner.ui.theme.EcoscannerTheme
-// IMPORTS CORRECTOS DE SUPABASE
+import com.google.zxing.integration.android.IntentIntegrator
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.postgrest.Postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            startBarcodeScanner()
+        } else {
+            Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             EcoscannerTheme {
-                App()
+                EcoscannerApp(
+                    onRequestCameraPermission = { requestCameraPermission() }
+                )
             }
+        }
+    }
+
+    fun requestCameraPermission() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            startBarcodeScanner()
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun startBarcodeScanner() {
+        val integrator = IntentIntegrator(this)
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
+        integrator.setPrompt("Escanea el código de barras del producto")
+        integrator.setCameraId(0)
+        integrator.setBeepEnabled(true)
+        integrator.setOrientationLocked(false)
+        integrator.initiateScan()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null && result.contents != null) {
+            val barcode = result.contents
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val product = withContext(Dispatchers.IO) {
+                        OpenFoodFactsApi.getProductByBarcode(barcode)
+                    }
+                    if (product != null && product.isScanned) {
+                        ProductRepository.updateProduct(product)
+                        Toast.makeText(this@MainActivity, "Producto encontrado: ${product.name}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Producto no encontrado en la base de datos", Toast.LENGTH_LONG).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 }
 
 @Composable
-fun App() {
-    // Es mejor usar remember para que el cliente no se recree en cada recomposición
+fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
     val supabase = remember {
         createSupabaseClient(
             supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
@@ -38,16 +107,17 @@ fun App() {
 
     var paginaSeleccionada by remember { mutableStateOf("Registro") }
 
-    // Usamos un bloque 'when' para que el código sea más limpio (estilo Kotlin)
     when (paginaSeleccionada) {
         "Registro" -> {
             Registro(
+                supabaseClient = supabase,
                 onClickInici = { paginaSeleccionada = "InicioSesion" },
                 onClickRegistrarse = { paginaSeleccionada = "escaner" }
             )
         }
         "InicioSesion" -> {
             InicioSesion(
+                supabaseClient = supabase,
                 onClickRegistrarme = { paginaSeleccionada = "Registro" },
                 onClickIniciar = { paginaSeleccionada = "escaner" }
             )
@@ -55,14 +125,15 @@ fun App() {
         "escaner" -> {
             Escaner(
                 onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
-                onClickCamaraGps = { paginaSeleccionada = "PantallaCamera" }
+                onClickDatos = { paginaSeleccionada = "Datos" },
+                onOpenCamera = { onRequestCameraPermission() }
             )
         }
         "Estadisticas" -> {
             Estadisticas(onVolverEscaner = { paginaSeleccionada = "escaner" })
         }
-        "PantallaCamera" -> {
-            PantallaCamera(onTornar = { paginaSeleccionada = "escaner" })
+        "Datos" -> {
+            Datos(onVolverEscaner = { paginaSeleccionada = "escaner" })
         }
     }
 }

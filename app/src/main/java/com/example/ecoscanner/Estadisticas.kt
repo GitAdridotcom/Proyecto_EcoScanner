@@ -14,39 +14,6 @@ import kotlinx.coroutines.withContext
 @Composable
 fun Estadisticas(onVolverEscaner: () -> Unit) {
 
-    // 1. Variables de estado
-    var nombreProducto by remember { mutableStateOf("Cargando...") }
-    var paisOrigen by remember { mutableStateOf("") }
-    var co2 by remember { mutableStateOf(0.0) }
-    var error by remember { mutableStateOf("") }
-
-    // 2. Llamada a las APIs, va aquí arriba, fuera de cualquier Box o Column
-    LaunchedEffect(Unit) {
-        try {
-            val productoResponse = withContext(Dispatchers.IO) {
-                RetrofitClient.openFoodFacts.getProducto("8410180103507")
-            }
-            nombreProducto = productoResponse.product.product_name
-            paisOrigen = productoResponse.product.countries_tags.firstOrNull() ?: "Desconocido"
-
-            val co2Response = withContext(Dispatchers.IO) {
-                RetrofitClient.climatiq.calcularCO2(
-                    token = "Bearer P1CVT47HV575KEXZM18MP8T4P0",
-                    body = ClimatiqRequest(
-                        emission_factor = EmissionFactor(),
-                        parameters = Parameters(distance = 500.0)
-                    )
-                )
-            }
-            co2 = co2Response.co2e
-
-        } catch (e: retrofit2.HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            error = "Error: $errorBody"
-        } catch (e: Exception) {
-            error = "Error: ${e.message}"
-        }
-    }
 
     // 3. UI
     ModalNavigationDrawer(
@@ -93,13 +60,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // 4. Mostrar datos obtenidos de las APIs
-                    if (error.isNotEmpty()) {
-                        Text(error, color = Color.Red)
-                    } else {
-                        Text("Producto: $nombreProducto")
-                        Text("Origen: $paisOrigen")
-                        Text("CO₂ estimado: $co2 kg")
-                    }
+
 
                     Spacer(modifier = Modifier.height(20.dp))
 

@@ -19,28 +19,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-// --- IMPORTS DE SUPABASE ---
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.postgrest.Postgrest
-// --- OTROS ---
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-// Inicialización de Supabase (Global)
-val supabase = createSupabaseClient(
-    supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
-    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1b2RyaXlvb3N2dXh3Y2x6Y3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDE2NTIsImV4cCI6MjA5MTkxNzY1Mn0.uA6cD3fFASdSTD-AEaHsgrFCK_ryuphZJ3IpfNLPEes"
-) {
-    install(Auth)
-    install(Postgrest)
-}
-
-
-suspend fun registrouser(emailUser: String, passUser: String): Result<Unit> {
+suspend fun registrouser(supabase: SupabaseClient, emailUser: String, passUser: String): Result<Unit> {
     return try {
         supabase.auth.signUpWith(Email) {
             email = emailUser
@@ -56,7 +42,11 @@ suspend fun registrouser(emailUser: String, passUser: String): Result<Unit> {
 }
 
 @Composable
-fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
+fun Registro(
+    supabaseClient: SupabaseClient,
+    onClickInici: () -> Unit,
+    onClickRegistrarse: () -> Unit
+) {
     var correo by remember { mutableStateOf("") }
     var contraseña by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -133,16 +123,15 @@ fun Registro(onClickInici: () -> Unit, onClickRegistrarse: () -> Unit) {
                         if (correo.isNotBlank() && contraseña.isNotBlank()) {
                             scope.launch {
                                 cargando = true
-                                mensaje = "" // Limpiar errores previos
+                                mensaje = ""
 
-                                val resultado = registrouser(correo.trim(), contraseña.trim())
+                                val resultado = registrouser(supabaseClient, correo.trim(), contraseña.trim())
 
                                 resultado.onSuccess {
                                     cargando = false
                                     onClickRegistrarse()
                                 }.onFailure { error ->
                                     cargando = false
-                                    // Manejo de errores amigable
                                     mensaje = when {
                                         error.message?.contains("short") == true -> "Contraseña demasiado corta (mín. 6)"
                                         error.message?.contains("already") == true -> "Este correo ya está registrado"

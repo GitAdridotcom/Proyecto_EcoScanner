@@ -19,17 +19,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-// --- IMPORTS DE SUPABASE ---
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.launch
 
-/**
- * Función para Iniciar Sesión (Corregida)
- */
-suspend fun iniciosesionn(emailUser: String, passUser: String): Result<Unit> {
+suspend fun iniciosesionn(supabase: SupabaseClient, emailUser: String, passUser: String): Result<Unit> {
     return try {
-        // Usamos signInWith en lugar de signUpWith
         supabase.auth.signInWith(Email) {
             email = emailUser
             password = passUser
@@ -41,7 +37,11 @@ suspend fun iniciosesionn(emailUser: String, passUser: String): Result<Unit> {
 }
 
 @Composable
-fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit) {
+fun InicioSesion(
+    supabaseClient: SupabaseClient,
+    onClickRegistrarme: () -> Unit,
+    onClickIniciar: () -> Unit
+) {
     var correo by remember { mutableStateOf("") }
     var contraseña by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -79,7 +79,6 @@ fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // Campo Correo
             OutlinedTextField(
                 value = correo,
                 onValueChange = { correo = it },
@@ -90,7 +89,6 @@ fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit) {
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            // Campo Contraseña (Añadido transformación visual)
             OutlinedTextField(
                 value = contraseña,
                 onValueChange = { contraseña = it },
@@ -121,12 +119,11 @@ fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit) {
                             scope.launch {
                                 cargando = true
                                 mensaje = ""
-                                // LLAMADA CORRECTA A INICIO DE SESIÓN
-                                val resultado = iniciosesionn(correo.trim(), contraseña.trim())
+                                val resultado = iniciosesionn(supabaseClient, correo.trim(), contraseña.trim())
 
                                 resultado.onSuccess {
                                     cargando = false
-                                    onClickIniciar() // Navegar al home
+                                    onClickIniciar()
                                 }.onFailure { error ->
                                     cargando = false
                                     mensaje = when {
@@ -147,7 +144,6 @@ fun InicioSesion(onClickRegistrarme: () -> Unit, onClickIniciar: () -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Opción para ir a Registro
             Row {
                 Text("¿No tienes cuenta? ")
                 Text(
