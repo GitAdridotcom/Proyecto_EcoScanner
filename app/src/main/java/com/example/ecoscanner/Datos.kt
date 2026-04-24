@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.ecoscanner.ui.theme.*
 
 @Composable
 fun Datos(onVolverEscaner: () -> Unit) {
@@ -29,6 +30,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(SpringWood)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -37,7 +39,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
             "Datos del Producto",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF2E7D32)
+            color = Como
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -45,7 +47,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
         Text(
             if (currentProduct?.isScanned == true) "Información del último producto escaneado" else "Escanea un producto para ver sus datos",
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = Como.copy(alpha = 0.7f)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -71,14 +73,14 @@ fun Datos(onVolverEscaner: () -> Unit) {
                         modifier = Modifier
                             .size(80.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE8F5E9)),
+                            .background(MossGreen.copy(alpha = 0.3f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.ShoppingCart,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
-                            tint = Color(0xFF2E7D32)
+                            tint = Tradewind
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -125,7 +127,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                     Icon(
                         Icons.Default.LocationOn,
                         contentDescription = null,
-                        tint = Color(0xFF1565C0),
+                        tint = Como,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -142,7 +144,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFFE3F2FD))
+                        .background(GrayNurse)
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -162,7 +164,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                     Icon(
                         Icons.Default.LocationOn,
                         contentDescription = null,
-                        tint = Color(0xFF1565C0),
+                        tint = Como,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -186,7 +188,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                     Icon(
                         Icons.Default.Star,
                         contentDescription = null,
-                        tint = Color(0xFFE65100),
+                        tint = MossGreen,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -280,7 +282,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                     Icon(
                         Icons.Default.Star,
                         contentDescription = null,
-                        tint = Color(0xFF7B1FA2),
+                        tint = Tradewind,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -317,7 +319,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
             onClick = { onVolverEscaner() },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2E7D32)
+                containerColor = Tradewind
             ),
             shape = RoundedCornerShape(12.dp)
         ) {

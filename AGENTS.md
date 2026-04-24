@@ -11,6 +11,15 @@
 - **Product Data**: `ProductRepository` - Uses StateFlow for reactive updates
 - **Carbon Tracking**: `CarbonFootprintTracker` - Accumulates CO₂ and km saved
 
+## Color Palette (defined in ui/theme/Color.kt)
+| Name | Hex | Usage |
+|------|-----|-------|
+| SpringWood | #F8F6F1 | Background |
+| GrayNurse | #E1EAE5 | Secondary background |
+| MossGreen | #A7D7B8 | Accent |
+| Tradewind | #66B2A0 | Primary buttons |
+| Como | #4E796B | Text, dark elements |
+
 ## Important Patterns
 
 ### State Management
@@ -36,8 +45,3 @@
 - `ProductData.kt` - Data models and repository
 - `OpenFoodFactsApi.kt` - API client
 - `CarbonFootprintTracker.kt` - Environmental impact tracking
-- `PantallaCamera.kt` - Camera/GPS features (separate flow)
-
-## Unused Files (do not modify)
-- `DetallViewModel.kt` - Legacy, not connected
-- `PantallaCamera.kt` - Standalone camera feature

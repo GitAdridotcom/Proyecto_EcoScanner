@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.ecoscanner.ui.theme.*
 
 @Composable
 fun Estadisticas(onVolverEscaner: () -> Unit) {
@@ -28,10 +29,11 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                     Text(
                         "EcoScanner Menu",
                         modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Como
                     )
-                    HorizontalDivider()
-                    Text("Secciones", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+                    HorizontalDivider(color = GrayNurse)
+                    Text("Secciones", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium, color = Como)
                     NavigationDrawerItem(
                         label = { Text("Escáner") },
                         selected = false,
@@ -40,7 +42,10 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                     NavigationDrawerItem(
                         label = { Text("Estadísticas") },
                         selected = true,
-                        onClick = { }
+                        onClick = { },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MossGreen.copy(alpha = 0.3f)
+                        )
                     )
                 }
             }
@@ -51,7 +56,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .background(Color.White)
+                    .background(SpringWood)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -59,7 +64,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                     "Estadísticas",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2E7D32)
+                    color = Como
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -67,7 +72,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                 Text(
                     "Resumen de tu impacto ambiental",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = Como.copy(alpha = 0.7f)
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -80,14 +85,14 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                         title = "CO₂ Ahorrado",
                         value = String.format("%.2f", co2Saved),
                         unit = "kg",
-                        color = Color(0xFF2E7D32)
+                        color = Como
                     )
 
                     StatCard(
                         title = "Km Reducidos",
                         value = String.format("%.1f", kmReduced),
                         unit = "km",
-                        color = Color(0xFF1565C0)
+                        color = Como
                     )
                 }
 
@@ -96,7 +101,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                    colors = CardDefaults.cardColors(containerColor = GrayNurse)
                 ) {
                     Row(
                         modifier = Modifier
@@ -113,7 +118,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                             "$scanCount productos",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2E7D32)
+                            color = Como
                         )
                     }
                 }
@@ -135,7 +140,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                             "Tu contribución al planeta",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2E7D32)
+                            color = Como
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -143,7 +148,7 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                                 String.format("%.2f", co2Saved)
                             } kg de CO₂ gracias a tus decisiones de compra más sostenibles.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray,
+                            color = Como.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
                         )
                     }
