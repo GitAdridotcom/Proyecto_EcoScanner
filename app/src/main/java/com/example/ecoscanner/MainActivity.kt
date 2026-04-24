@@ -25,6 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+object NavigationState {
+    var currentPage by mutableStateOf("Registro")
+}
+
 class MainActivity : ComponentActivity() {
 
     private val cameraPermissionLauncher = registerForActivityResult(
@@ -79,6 +83,14 @@ class MainActivity : ComponentActivity() {
                     }
                     if (product != null && product.isScanned) {
                         ProductRepository.updateProduct(product)
+                        NavigationState.currentPage = "escaner"
+                        setContent {
+                            EcoscannerTheme {
+                                EcoscannerApp(
+                                    onRequestCameraPermission = { requestCameraPermission() }
+                                )
+                            }
+                        }
                         Toast.makeText(this@MainActivity, "Producto encontrado: ${product.name}", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@MainActivity, "Producto no encontrado en la base de datos", Toast.LENGTH_LONG).show()
@@ -105,7 +117,11 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
         }
     }
 
-    var paginaSeleccionada by remember { mutableStateOf("Registro") }
+    var paginaSeleccionada by remember { mutableStateOf(NavigationState.currentPage) }
+
+    LaunchedEffect(paginaSeleccionada) {
+        NavigationState.currentPage = paginaSeleccionada
+    }
 
     when (paginaSeleccionada) {
         "Registro" -> {
