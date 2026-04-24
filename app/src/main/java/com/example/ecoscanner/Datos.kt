@@ -18,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.ecoscanner.ui.theme.*
 
 @Composable
@@ -73,8 +75,14 @@ fun Datos(onVolverEscaner: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentProduct?.imageUrl != null) {
-
-
+                    AsyncImage(
+                        model = currentProduct.imageUrl,
+                        contentDescription = "Imagen del producto",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Fit
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                 } else {
                     Box(
