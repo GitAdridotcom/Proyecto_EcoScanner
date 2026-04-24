@@ -1,5 +1,6 @@
 package com.example.ecoscanner
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.ecoscanner.ui.theme.*
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun Estadisticas(onVolverEscaner: () -> Unit) {
     val co2Saved by CarbonFootprintTracker.totalCo2Saved.collectAsState()
@@ -82,14 +84,14 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     StatCard(
-                        title = "CO₂ Ahorrado",
+                        title = "CO₂ Estimado",
                         value = String.format("%.2f", co2Saved),
                         unit = "kg",
                         color = Como
                     )
 
                     StatCard(
-                        title = "Km Reducidos",
+                        title = "Km Estimados",
                         value = String.format("%.1f", kmReduced),
                         unit = "km",
                         color = Como
@@ -137,16 +139,16 @@ fun Estadisticas(onVolverEscaner: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Tu contribución al planeta",
+                            "Resumen de impacto estimado",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Como
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Has dejado de emitir ${
+                            "Impacto estimado de transporte: ${
                                 String.format("%.2f", co2Saved)
-                            } kg de CO₂ gracias a tus decisiones de compra más sostenibles.",
+                            } kg de CO₂ para los productos escaneados.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Como.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center

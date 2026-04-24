@@ -2,6 +2,7 @@
 package com.example.ecoscanner
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -71,6 +72,7 @@ class MainActivity : ComponentActivity() {
         integrator.initiateScan()
     }
 
+    @SuppressLint("DefaultLocale")
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
@@ -84,9 +86,22 @@ class MainActivity : ComponentActivity() {
                     if (product != null && product.isScanned) {
                         ProductRepository.updateProduct(product)
 
-                        val co2Saved = product.carbonFootprint ?: (product.nutriments.calories ?: 0.0) * 0.01
-                        val kmReduced = co2Saved / 0.12
+                        val carbonResult = CarbonCalculator.calculateCarbonFootprint(
+                            productOrigin = product.origin,
+                            userCountry = null
+                        )
+
+                        val co2Saved = if (carbonResult.co2Kg.toDouble() > 0.0) carbonResult.co2Kg.toDouble() else 0.5
+                        val kmReduced = carbonResult.kmDistance.toDouble()
+                        
                         CarbonFootprintTracker.addScan(co2Saved, kmReduced)
+
+                        val toastMessage = if (carbonResult.kmDistance > 0) {
+                            "Producto: ${product.name}\nOrigen: ${carbonResult.originCountry}\nCO₂ estimado: ${String.format("%.2f", co2Saved)} kg"
+                        } else {
+                            "Producto: ${product.name}"
+                        }
+                        Toast.makeText(this@MainActivity, toastMessage, Toast.LENGTH_LONG).show()
 
                         NavigationState.currentPage = "escaner"
                         setContent {
@@ -96,7 +111,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        Toast.makeText(this@MainActivity, "Producto encontrado: ${product.name}", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(this@MainActivity, "Producto no encontrado en la base de datos", Toast.LENGTH_LONG).show()
                     }

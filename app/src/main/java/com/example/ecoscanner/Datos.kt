@@ -27,6 +27,14 @@ fun Datos(onVolverEscaner: () -> Unit) {
     val product by ProductRepository.lastScannedProduct.collectAsState()
     val currentProduct = product
 
+    val originNormalizado = currentProduct?.origin?.let {
+        CarbonCalculator.calculateCarbonFootprint(it, null).originCountry
+    } ?: "Por determinar"
+
+    val co2Estimado = currentProduct?.origin?.let {
+        CarbonCalculator.calculateCarbonFootprint(it, null).co2Kg
+    } ?: 0.0
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -156,7 +164,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                             color = Color.Gray
                         )
                         Text(
-                            currentProduct?.origin?.take(50) ?: "Por determinar",
+                            originNormalizado.take(50),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
@@ -207,11 +215,11 @@ fun Datos(onVolverEscaner: () -> Unit) {
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "CO₂",
+                            "CO₂ Estimado",
                             style = MaterialTheme.typography.titleMedium,
                             color = Color(0xFFE65100)
                         )
-                        val co2 = currentProduct?.carbonFootprint ?: currentProduct?.nutriments?.calories?.div(100)
+                        val co2 = co2Estimado
                         Text(
                             String.format("%.2f", co2 ?: 0.0),
                             style = MaterialTheme.typography.headlineMedium,
@@ -219,7 +227,7 @@ fun Datos(onVolverEscaner: () -> Unit) {
                             color = Color(0xFFE65100)
                         )
                         Text(
-                            "kg CO2eq",
+                            "kg CO₂eq (transporte)",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
