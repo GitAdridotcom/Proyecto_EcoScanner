@@ -19,9 +19,9 @@ import com.example.ecoscanner.ui.theme.*
 @SuppressLint("DefaultLocale")
 @Composable
 fun Estadisticas(onVolverEscaner: () -> Unit) {
-    val co2Saved by CarbonFootprintTracker.totalCo2Saved.collectAsState()
-    val kmReduced by CarbonFootprintTracker.totalKmReduced.collectAsState()
-    val scanCount by CarbonFootprintTracker.scanCount.collectAsState()
+    val co2Saved by StatsRepository.totalCo2.collectAsState()
+    val kmReduced by StatsRepository.totalKm.collectAsState()
+    val scanCount by StatsRepository.scanCount.collectAsState()
 
     ModalNavigationDrawer(
         drawerContent = {

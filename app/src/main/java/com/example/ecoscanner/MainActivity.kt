@@ -23,6 +23,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -96,6 +97,23 @@ class MainActivity : ComponentActivity() {
                         
                         CarbonFootprintTracker.addScan(co2Saved, kmReduced)
 
+                        // Guardar en Supabase
+                        try {
+                            coroutineScope {
+                                StatsRepository.saveScan(
+                                    supabase = SupabaseManager.client,
+                                    productCode = product.code,
+                                    productName = product.name,
+                                    productBrand = product.brand,
+                                    origin = carbonResult.originCountry,
+                                    co2Kg = co2Saved,
+                                    kmDistance = kmReduced
+                                )
+                            }
+                        } catch (e: Exception) {
+                            // Error al guardar, pero seguimos
+                        }
+
                         val toastMessage = if (carbonResult.kmDistance > 0) {
                             "Producto: ${product.name}\nOrigen: ${carbonResult.originCountry}\nCO₂ estimado: ${String.format("%.2f", co2Saved)} kg"
                         } else {
@@ -133,6 +151,21 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
         ) {
             install(Auth)
             install(Postgrest)
+        }
+    }
+
+    // Guardar cliente globalmente
+    LaunchedEffect(supabase) {
+        SupabaseManager.setClient(supabase)
+    }
+
+    // Cargar datos del usuario al iniciar
+    LaunchedEffect(Unit) {
+        try {
+            StatsRepository.loadUserScans(supabase)
+        } catch (e: Exception) {
+            // Si falla, usar datos en memoria
+            StatsRepository.loadFromMemory()
         }
     }
 
