@@ -76,7 +76,7 @@ fun Registro(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "Tu asistente de huella de transporte y Km 0",
+                text = "Haz visible lo invisible del consumo.",
                 modifier = Modifier.width(200.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium

@@ -71,7 +71,7 @@ fun InicioSesion(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                "Asistent de Petjada de Transport i Km 0",
+                "Tu impacto ambiental, en un escaneo.",
                 modifier = Modifier.width(200.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium

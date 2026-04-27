@@ -128,7 +128,7 @@ fun Escaner(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        "Escanea productos para conocer su\nimpacto ambiental y nutricional",
+                        "Escanea productos para conocer su\nimpacto ambiental y valor nutricional",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Como.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
@@ -220,7 +220,7 @@ fun Escaner(
                                     color = Como
                                 )
                                 Text(
-                                    "Accede al menú para ver estadísticas y datos del producto",
+                                    "Accede al menú para ver tus estadísticas y datos del producto",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Como.copy(alpha = 0.7f)
                                 )
