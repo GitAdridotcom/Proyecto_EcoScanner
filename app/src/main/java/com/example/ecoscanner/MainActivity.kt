@@ -21,6 +21,7 @@ import com.example.ecoscanner.ui.theme.EcoscannerTheme
 import com.google.zxing.integration.android.IntentIntegrator
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +48,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        SupabaseManager.setActivity(this)
+        
+        val hasSession = SupabaseManager.client.auth.currentSessionOrNull() != null
+        NavigationState.currentPage = if (hasSession) "escaner" else "Registro"
+        
         setContent {
             EcoscannerTheme {
                 EcoscannerApp(
@@ -204,6 +211,9 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
                     onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
                     onClickDatos = { paginaSeleccionada = "Datos" },
                     onClickHistorial = { paginaSeleccionada = "Historial" },
+                    onClickCerrarSesion = { 
+                        SupabaseManager.logout()
+                    },
                     onOpenCamera = { onRequestCameraPermission() }
                 )
             }

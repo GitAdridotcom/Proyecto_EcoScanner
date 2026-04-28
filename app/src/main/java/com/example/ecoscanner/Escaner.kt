@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
@@ -27,7 +28,8 @@ fun Escaner(
     onClickEstadisticas: () -> Unit,
     onClickDatos: () -> Unit,
     onOpenCamera: () -> Unit,
-    onClickHistorial: () -> Unit = {}
+    onClickHistorial: () -> Unit = {},
+    onClickCerrarSesion: () -> Unit = {}
 ) {
     ModalNavigationDrawer(
         drawerContent = {
@@ -76,10 +78,16 @@ fun Escaner(
                     Spacer(modifier = Modifier.weight(1f))
 
                     Button(
-                        onClick = { },
+                        onClick = { onClickCerrarSesion() },
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Tradewind)
+                        colors = ButtonDefaults.buttonColors(containerColor = Como)
                     ) {
+                        Icon(
+                            Icons.Default.Logout,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("Cerrar Sesión")
                     }
                 }
