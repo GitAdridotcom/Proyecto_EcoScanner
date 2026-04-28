@@ -8,8 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +26,8 @@ import com.example.ecoscanner.ui.theme.*
 fun Escaner(
     onClickEstadisticas: () -> Unit,
     onClickDatos: () -> Unit,
-    onOpenCamera: () -> Unit
+    onOpenCamera: () -> Unit,
+    onClickHistorial: () -> Unit = {}
 ) {
     ModalNavigationDrawer(
         drawerContent = {
@@ -61,6 +63,12 @@ fun Escaner(
                         label = { Text("Estadisticas") },
                         selected = false,
                         onClick = { onClickEstadisticas() }
+                    )
+
+                    NavigationDrawerItem(
+                        label = { Text("Historial") },
+                        selected = false,
+                        onClick = { onClickHistorial() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = GrayNurse)
@@ -206,7 +214,7 @@ fun Escaner(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                Icons.Default.ArrowForward,
+                                Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
                                 tint = Como,
                                 modifier = Modifier.size(32.dp)

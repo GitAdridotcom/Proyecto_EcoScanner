@@ -44,6 +44,13 @@ object OpenFoodFactsApi {
             val nutriments = product["nutriments"]?.jsonObject
             val ecoScoreData = product["ecoscore_data"]?.jsonObject
 
+            // Determine weight in kilograms if available
+            val weightKgValue = run {
+                val w1 = product["weight"]?.jsonPrimitive?.content?.toDoubleOrNull()
+                val w2 = product["product_weight_grams"]?.jsonPrimitive?.content?.toDoubleOrNull()
+                val grams = w1 ?: w2
+                grams?.div(1000.0)
+            }
             ProductData(
                 code = product["code"]?.jsonPrimitive?.content ?: "",
                 name = product["product_name_es"]?.jsonPrimitive?.content
@@ -69,6 +76,7 @@ object OpenFoodFactsApi {
                     proteins = nutriments?.get("proteins_100g")?.jsonPrimitive?.content?.toDoubleOrNull(),
                     salt = nutriments?.get("salt_100g")?.jsonPrimitive?.content?.toDoubleOrNull()
                 ),
+                weightKg = weightKgValue,
                 ingredients = product["ingredients_text_es"]?.jsonPrimitive?.content
                     ?: product["ingredients_text"]?.jsonPrimitive?.content
                     ?: "",
@@ -109,6 +117,17 @@ object OpenFoodFactsApi {
             "C" -> "Impacto medio"
             "D" -> "Alto impacto"
             "E" -> "Muy alto impacto"
+            else -> "Sin datos"
+        }
+    }
+
+    fun getNutriScoreLabel(grade: String?): String {
+        return when (grade?.uppercase()) {
+            "A" -> "Muy saludable"
+            "B" -> "Saludable"
+            "C" -> "Moderado"
+            "D" -> "Poco saludable"
+            "E" -> "Poco saludable"
             else -> "Sin datos"
         }
     }

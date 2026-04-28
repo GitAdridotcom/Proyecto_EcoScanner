@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.ecoscanner.ui.theme.EcoscannerTheme
 import com.google.zxing.integration.android.IntentIntegrator
@@ -87,9 +88,13 @@ class MainActivity : ComponentActivity() {
                     if (product != null && product.isScanned) {
                         ProductRepository.updateProduct(product)
 
-                        val carbonResult = CarbonCalculator.calculateCarbonFootprint(
+                        val userLocation = LocationHelper.getLastKnownLocation()
+                        val weightKgValue = product.weightKg ?: 1.0
+                        val carbonResult = CarbonCalculator.calculateCarbonFootprintWithCoordinates(
                             productOrigin = product.origin,
-                            userCountry = null
+                            userLat = userLocation?.latitude,
+                            userLon = userLocation?.longitude,
+                            weightKg = weightKgValue
                         )
 
                         val co2Saved = if (carbonResult.co2Kg.toDouble() > 0.0) carbonResult.co2Kg.toDouble() else 0.5
@@ -97,7 +102,6 @@ class MainActivity : ComponentActivity() {
                         
                         CarbonFootprintTracker.addScan(co2Saved, kmReduced)
 
-                        // Guardar en Supabase
                         try {
                             coroutineScope {
                                 StatsRepository.saveScan(
@@ -111,7 +115,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         } catch (e: Exception) {
-                            // Error al guardar, pero seguimos
                         }
 
                         val toastMessage = if (carbonResult.kmDistance > 0) {
@@ -144,6 +147,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
+    val context = LocalContext.current
     val supabase = remember {
         createSupabaseClient(
             supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
@@ -154,17 +158,21 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
         }
     }
 
-    // Guardar cliente globalmente
     LaunchedEffect(supabase) {
         SupabaseManager.setClient(supabase)
     }
 
-    // Cargar datos del usuario al iniciar
+    LaunchedEffect(Unit) {
+        try {
+            LocationHelper.getUserLocation(context)
+        } catch (e: Exception) {
+        }
+    }
+
     LaunchedEffect(Unit) {
         try {
             StatsRepository.loadUserScans(supabase)
         } catch (e: Exception) {
-            // Si falla, usar datos en memoria
             StatsRepository.loadFromMemory()
         }
     }
@@ -175,33 +183,51 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
         NavigationState.currentPage = paginaSeleccionada
     }
 
-    when (paginaSeleccionada) {
-        "Registro" -> {
-            Registro(
-                supabaseClient = supabase,
-                onClickInici = { paginaSeleccionada = "InicioSesion" },
-                onClickRegistrarse = { paginaSeleccionada = "escaner" }
-            )
-        }
-        "InicioSesion" -> {
-            InicioSesion(
-                supabaseClient = supabase,
-                onClickRegistrarme = { paginaSeleccionada = "Registro" },
-                onClickIniciar = { paginaSeleccionada = "escaner" }
-            )
-        }
-        "escaner" -> {
-            Escaner(
-                onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
-                onClickDatos = { paginaSeleccionada = "Datos" },
-                onOpenCamera = { onRequestCameraPermission() }
-            )
-        }
-        "Estadisticas" -> {
-            Estadisticas(onVolverEscaner = { paginaSeleccionada = "escaner" })
-        }
-        "Datos" -> {
-            Datos(onVolverEscaner = { paginaSeleccionada = "escaner" })
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (paginaSeleccionada) {
+            "Registro" -> {
+                Registro(
+                    supabaseClient = supabase,
+                    onClickInici = { paginaSeleccionada = "InicioSesion" },
+                    onClickRegistrarse = { paginaSeleccionada = "escaner" }
+                )
+            }
+            "InicioSesion" -> {
+                InicioSesion(
+                    supabaseClient = supabase,
+                    onClickRegistrarme = { paginaSeleccionada = "Registro" },
+                    onClickIniciar = { paginaSeleccionada = "escaner" }
+                )
+            }
+            "escaner" -> {
+                Escaner(
+                    onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
+                    onClickDatos = { paginaSeleccionada = "Datos" },
+                    onClickHistorial = { paginaSeleccionada = "Historial" },
+                    onOpenCamera = { onRequestCameraPermission() }
+                )
+            }
+            "Estadisticas" -> {
+                Estadisticas(
+                    onVolverEscaner = { paginaSeleccionada = "escaner" },
+                    onClickDatos = { paginaSeleccionada = "Datos" },
+                    onClickHistorial = { paginaSeleccionada = "Historial" }
+                )
+            }
+            "Datos" -> {
+                Datos(
+                    onVolverEscaner = { paginaSeleccionada = "escaner" },
+                    onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
+                    onClickHistorial = { paginaSeleccionada = "Historial" }
+                )
+            }
+            "Historial" -> {
+                HistorialScreen(
+                    onVolverEscaner = { paginaSeleccionada = "escaner" },
+                    onClickDatos = { paginaSeleccionada = "Datos" },
+                    onClickEstadisticas = { paginaSeleccionada = "Estadisticas" }
+                )
+            }
         }
     }
 }

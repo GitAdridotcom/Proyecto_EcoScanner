@@ -18,154 +18,127 @@ import com.example.ecoscanner.ui.theme.*
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun Estadisticas(onVolverEscaner: () -> Unit) {
+fun Estadisticas(
+    onVolverEscaner: () -> Unit,
+    onClickDatos: () -> Unit = {},
+    onClickHistorial: () -> Unit = {}
+) {
     val co2Saved by StatsRepository.totalCo2.collectAsState()
     val kmReduced by StatsRepository.totalKm.collectAsState()
     val scanCount by StatsRepository.scanCount.collectAsState()
 
-    ModalNavigationDrawer(
-        drawerContent = {
-            ModalDrawerSheet {
-                Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "EcoScanner Menu",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Como
-                    )
-                    HorizontalDivider(color = GrayNurse)
-                    Text("Secciones", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium, color = Como)
-                    NavigationDrawerItem(
-                        label = { Text("Escáner") },
-                        selected = false,
-                        onClick = { onVolverEscaner() }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Estadísticas") },
-                        selected = true,
-                        onClick = { },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = MossGreen.copy(alpha = 0.3f)
-                        )
-                    )
-                }
-            }
-        }
-    ) {
-        Scaffold { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .background(SpringWood)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(SpringWood)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                "Estadísticas",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Como
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                "Resumen de tu impacto ambiental",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Como.copy(alpha = 0.7f)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(
-                    "Estadísticas",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
+                StatCard(
+                    title = "CO₂ Estimado",
+                    value = String.format("%.2f", co2Saved),
+                    unit = "kg",
                     color = Como
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    "Resumen de tu impacto ambiental",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Como.copy(alpha = 0.7f)
+                StatCard(
+                    title = "Km Estimados",
+                    value = String.format("%.1f", kmReduced),
+                    unit = "km",
+                    color = Como
                 )
+            }
 
-                Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GrayNurse)
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatCard(
-                        title = "CO₂ Estimado",
-                        value = String.format("%.2f", co2Saved),
-                        unit = "kg",
+                    Text(
+                        "Total escaneos",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        "$scanCount productos",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
                         color = Como
                     )
+                }
+            }
 
-                    StatCard(
-                        title = "Km Estimados",
-                        value = String.format("%.1f", kmReduced),
-                        unit = "km",
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Resumen de impacto estimado",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
                         color = Como
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "Impacto estimado de transporte: ${
+                            String.format("%.2f", co2Saved)
+                        } kg de CO₂ para los productos escaneados.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Como.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = GrayNurse)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Total escaneos",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            "$scanCount productos",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Como
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Resumen de impacto estimado",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Como
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            "Impacto estimado de transporte: ${
-                                String.format("%.2f", co2Saved)
-                            } kg de CO₂ para los productos escaneados.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Como.copy(alpha = 0.7f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = { onVolverEscaner() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Volver al Escáner")
-                }
+            Button(
+                onClick = { onVolverEscaner() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Volver al Escáner")
             }
         }
     }

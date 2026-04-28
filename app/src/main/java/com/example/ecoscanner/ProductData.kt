@@ -18,6 +18,7 @@ data class ProductData(
     val carbonFootprint: Double? = null,
     val nutriments: NutrientsData = NutrientsData(),
     val ingredients: String = "",
+    val weightKg: Double? = null,
     val isScanned: Boolean = false
 )
 
