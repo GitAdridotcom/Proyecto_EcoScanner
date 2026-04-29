@@ -46,6 +46,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseLocation = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+        
+        if (fineLocation || coarseLocation) {
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    LocationHelper.getUserLocation(this@MainActivity)
+                } catch (e: Exception) {
+                    // Silent fail - will use default calculations
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -58,7 +75,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             EcoscannerTheme {
                 EcoscannerApp(
-                    onRequestCameraPermission = { requestCameraPermission() }
+                    onRequestCameraPermission = { requestCameraPermission() },
+                    onRequestLocationPermission = { requestLocationPermission() }
                 )
             }
         }
@@ -69,6 +87,25 @@ class MainActivity : ComponentActivity() {
             startBarcodeScanner()
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    fun requestLocationPermission() {
+        val fineLocation = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val coarseLocation = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        
+        if (!fineLocation && !coarseLocation) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        } else if (!fineLocation && coarseLocation) {
+            // Only coarse granted, request fine
+            locationPermissionLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            )
         }
     }
 
@@ -96,7 +133,7 @@ class MainActivity : ComponentActivity() {
                     if (product != null && product.isScanned) {
                         ProductRepository.updateProduct(product)
 
-                        val userLocation = LocationHelper.getLastKnownLocation()
+                        val userLocation = LocationHelper.getUserLocation(this@MainActivity)
                         val weightKgValue = product.weightKg ?: 1.0
                         val carbonResult = CarbonCalculator.calculateCarbonFootprintWithCoordinates(
                             productOrigin = product.origin,
@@ -105,7 +142,7 @@ class MainActivity : ComponentActivity() {
                             weightKg = weightKgValue
                         )
 
-                        val co2Saved = if (carbonResult.co2Kg.toDouble() > 0.0) carbonResult.co2Kg.toDouble() else 0.5
+                        val co2Saved = carbonResult.co2Kg.toDouble()
                         val kmReduced = carbonResult.kmDistance.toDouble()
                         
                         CarbonFootprintTracker.addScan(co2Saved, kmReduced)
@@ -136,7 +173,8 @@ class MainActivity : ComponentActivity() {
                         setContent {
                             EcoscannerTheme {
                                 EcoscannerApp(
-                                    onRequestCameraPermission = { requestCameraPermission() }
+                                    onRequestCameraPermission = { requestCameraPermission() },
+                                    onRequestLocationPermission = { requestLocationPermission() }
                                 )
                             }
                         }
@@ -154,7 +192,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
+fun EcoscannerApp(
+    onRequestCameraPermission: () -> Unit,
+    onRequestLocationPermission: () -> Unit
+) {
     val context = LocalContext.current
     val supabase = remember {
         createSupabaseClient(
@@ -170,12 +211,7 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
         SupabaseManager.setClient(supabase)
     }
 
-    LaunchedEffect(Unit) {
-        try {
-            LocationHelper.getUserLocation(context)
-        } catch (e: Exception) {
-        }
-    }
+    
 
     LaunchedEffect(Unit) {
         try {

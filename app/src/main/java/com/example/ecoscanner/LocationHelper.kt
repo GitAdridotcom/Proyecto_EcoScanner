@@ -164,6 +164,18 @@ object CarbonCalculator {
 
     fun calculateCarbonFootprint(productOrigin: String?, userCountry: String?): CarbonResult {
         val originCountry = normalizeCountry(productOrigin)
+        
+        if (originCountry == "Otro" || productOrigin.isNullOrBlank()) {
+            return CarbonResult(
+                co2Kg = 0.0,
+                kmDistance = 0.0,
+                originCountry = "España",
+                userCountry = userCountry ?: "España",
+                transportType = "local",
+                message = "Origen no especificado - asumido local (España)"
+            )
+        }
+        
         val userCountryNorm = normalizeCountry(userCountry ?: "España")
         val distanceKm = getDistanceFromCountries(originCountry, userCountryNorm)
         return buildResult(originCountry, userCountryNorm, distanceKm)
@@ -171,6 +183,18 @@ object CarbonCalculator {
 
     fun calculateCarbonFootprintWithCoordinates(productOrigin: String?, userLat: Double?, userLon: Double?, weightKg: Double? = null): CarbonResult {
         val originCountry = normalizeCountry(productOrigin)
+        
+        if (originCountry == "Otro" || productOrigin.isNullOrBlank()) {
+            return CarbonResult(
+                co2Kg = 0.0,
+                kmDistance = 0.0,
+                originCountry = "España",
+                userCountry = if (userLat != null && userLon != null) "Tu ubicación" else "España",
+                transportType = "local",
+                message = "Origen no especificado - asumido local (España)"
+            )
+        }
+        
         val distanceKm = if (userLat != null && userLon != null) {
             val originCoords = LocationHelper.getCountryCoordinates(originCountry)
             if (originCoords != null) {
@@ -186,41 +210,33 @@ object CarbonCalculator {
     }
 
     private fun buildResult(originCountry: String, userCountry: String, distanceKm: Double, weightKg: Double? = null): CarbonResult {
-        val transportType = getTransportType(distanceKm)
+        val hasValidOrigin = originCountry.isNotBlank() && originCountry != "Otro"
+        val hasValidDistance = distanceKm > 0 && distanceKm < 20000
+        
+        val effectiveDistance = if (!hasValidOrigin) 0.0 else distanceKm
+        val transportType = getTransportType(effectiveDistance)
         val emissionPerKm = transportEmissionsPerKm[transportType]?.toDouble() ?: 0.060
         val weightFactor = weightKg ?: 1.0
         
-        // Verificar si hay datos靠谱os de origen
-        val hasValidOrigin = originCountry.isNotBlank() && originCountry != "Otro"
-        val hasValidDistance = distanceKm > 0 && distanceKm < 20000 // Distancia máxima razonable: 20000 km (circunferencia terrestre)
-        
-        // Si no hay datos靠谱os, usar valores por defecto seguros
         val co2Kg = when {
-            // Caso 1: Sin datos de origen, usar默认值 segura
             !hasValidOrigin -> {
-                when {
-                    userCountry.contains("España") -> 0.3  // Producto local
-                    userCountry.contains("Europa") -> 1.0   // Producto europeo
-                    else -> 2.0                           // Producto internacional
-                }
+                0.0
             }
-            // Caso 2: Datos existentes pero distancia fuera de rango
             !hasValidDistance -> {
                 when {
-                    distanceKm == 0.0 -> 0.0                 // Producto local confirmado
-                    else -> 1.0                             //默认值 por distancia irreal
+                    distanceKm == 0.0 -> 0.0
+                    else -> 1.0
                 }
             }
-            // Caso 3: Cálculo normal con límite de seguridad
             else -> {
                 val calculated = distanceKm * emissionPerKm * weightFactor
-                minOf(calculated, 10.0) // Máximo 10 kg por producto
+                minOf(calculated, 10.0)
             }
         }
         
         val message = when {
+            !hasValidOrigin -> "Origen no especificado - asumido local (España)"
             distanceKm == 0.0 -> "Producto local - 0 emisiones de transporte"
-            !hasValidOrigin -> "Origen no verificado - CO₂ estimado"
             distanceKm < 300 -> "Transporte por carretera - Bajas emisiones"
             distanceKm < 1000 -> "Transporte nacional - Emisiones moderadas"
             distanceKm < 2500 -> "Transporte internacional - Emisiones significativas"
@@ -228,7 +244,10 @@ object CarbonCalculator {
             else -> "Transporte intercontinental - Muy altas emisiones"
         }
         
-        return CarbonResult(co2Kg, minOf(distanceKm, 20000.0), originCountry, userCountry, transportType, message)
+        val finalDistance = if (!hasValidOrigin) 0.0 else minOf(distanceKm, 20000.0)
+        val finalOriginCountry = if (!hasValidOrigin) "España" else originCountry
+        
+        return CarbonResult(co2Kg, finalDistance, finalOriginCountry, userCountry, transportType, message)
     }
 
     private fun normalizeCountry(country: String?): String {

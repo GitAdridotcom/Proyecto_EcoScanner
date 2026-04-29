@@ -39,13 +39,17 @@ fun Datos(
     val product by ProductRepository.lastScannedProduct.collectAsState()
     val currentProduct = product
 
-    val originNormalizado = currentProduct?.origin?.let {
-        CarbonCalculator.calculateCarbonFootprint(it, null).originCountry
-    } ?: "Por determinar"
+    val originNormalizado = if (currentProduct?.origin != null) {
+        CarbonCalculator.calculateCarbonFootprint(currentProduct.origin, null).originCountry
+    } else {
+        "España"
+    }
 
-    val co2Estimado = currentProduct?.origin?.let {
-        CarbonCalculator.calculateCarbonFootprint(it, null).co2Kg
-    } ?: 0.0
+    val co2Estimado = if (currentProduct?.origin != null) {
+        CarbonCalculator.calculateCarbonFootprint(currentProduct.origin, null).co2Kg
+    } else {
+        0.0
+    }
 
     val ultimaDistanciaKm by CarbonFootprintTracker.lastKmReduced.collectAsState()
     val ultimaDistanciaKmValue = ultimaDistanciaKm
