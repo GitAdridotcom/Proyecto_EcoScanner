@@ -158,8 +158,8 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
     val context = LocalContext.current
     val supabase = remember {
         createSupabaseClient(
-            supabaseUrl = "https://buodriyoosvuxwclzcyh.supabase.co",
-            supabaseKey = "sb_publishable_26_DWNG8dxnkBbr8bf1aFg_zjgz1Mav"
+            supabaseUrl = "https://xhwuqwfqbyplcohsbomq.supabase.co",
+            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhod3Vxd2ZxYnlwbGNvaHNib21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjgyODgsImV4cCI6MjA5MzA0NDI4OH0.kqHHy1RyqHZHIqg7el9t61E-lvQdnlsI81HSmIPfpXk"
         ) {
             install(Auth)
             install(Postgrest)

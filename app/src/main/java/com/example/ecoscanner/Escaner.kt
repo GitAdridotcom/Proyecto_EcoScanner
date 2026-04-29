@@ -156,13 +156,6 @@ fun Escaner(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Text(
-                        "EcoScanner",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Como
-                    )
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
