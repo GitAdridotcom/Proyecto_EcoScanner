@@ -6,12 +6,9 @@ import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class UserScan(
@@ -86,32 +83,41 @@ object StatsRepository {
         return try {
             _isLoading.value = true
 
-            val userId = supabase.auth.currentSessionOrNull()?.user?.id
-            if (userId == null) {
+            val currentUserId = supabase.auth.currentSessionOrNull()?.user?.id
+            
+            if (currentUserId == null) {
+                resetLocalForced()
                 return Result.success(emptyList())
             }
 
-            val response = supabase.postgrest["user_scans"]
+            val allScans = supabase.postgrest["user_scans"]
                 .select()
                 .decodeList<UserScan>()
 
-            _userScans.value = response
-            _scanCount.value = response.size
-            _totalCo2.value = response.sumOf { it.co2_kg }
-            _totalKm.value = response.sumOf { it.km_distance }
+            val userScans = allScans.filter { scan -> 
+                scan.user_id == currentUserId 
+            }
 
-            Result.success(response)
+            _userScans.value = userScans
+            _scanCount.value = userScans.size
+            
+            _totalCo2.value = userScans.sumOf { it.co2_kg }
+            _totalKm.value = userScans.sumOf { it.km_distance }
+
+            Result.success(userScans)
         } catch (e: Exception) {
+            resetLocalForced()
             Result.failure(e)
         } finally {
             _isLoading.value = false
         }
     }
 
-    fun loadFromMemory() {
-        _totalCo2.value = CarbonFootprintTracker.totalCo2Saved.value
-        _totalKm.value = CarbonFootprintTracker.totalKmReduced.value
-        _scanCount.value = CarbonFootprintTracker.scanCount.value
+    private fun resetLocalForced() {
+        _userScans.value = emptyList()
+        _totalCo2.value = 0.0
+        _totalKm.value = 0.0
+        _scanCount.value = 0
     }
 
     fun resetLocal() {
@@ -119,5 +125,11 @@ object StatsRepository {
         _totalCo2.value = 0.0
         _totalKm.value = 0.0
         _scanCount.value = 0
+    }
+
+    fun loadFromMemory() {
+        _totalCo2.value = CarbonFootprintTracker.totalCo2Saved.value
+        _totalKm.value = CarbonFootprintTracker.totalKmReduced.value
+        _scanCount.value = CarbonFootprintTracker.scanCount.value
     }
 }

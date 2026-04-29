@@ -1,5 +1,6 @@
 package com.example.ecoscanner
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -18,9 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.ecoscanner.R
 import com.example.ecoscanner.ui.theme.*
 
 @Composable
@@ -29,7 +33,8 @@ fun Escaner(
     onClickDatos: () -> Unit,
     onOpenCamera: () -> Unit,
     onClickHistorial: () -> Unit = {},
-    onClickCerrarSesion: () -> Unit = {}
+    onClickCerrarSesion: () -> Unit = {},
+    onClickLimpiarHistorial: () -> Unit = {}
 ) {
     ModalNavigationDrawer(
         drawerContent = {
@@ -78,6 +83,22 @@ fun Escaner(
                     Spacer(modifier = Modifier.weight(1f))
 
                     Button(
+                        onClick = { onClickLimpiarHistorial() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                    ) {
+                        Icon(
+                            Icons.Default.CleaningServices,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Limpiar Historial")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
                         onClick = { onClickCerrarSesion() },
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Como)
@@ -116,19 +137,20 @@ fun Escaner(
                     Box(
                         modifier = Modifier
                             .size(180.dp)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(24.dp))
                             .background(
-                                Brush.linearGradient(
-                                    colors = listOf(Tradewind, Como)
+                                Brush.verticalGradient(
+                                    colors = listOf(GrayNurse, Color.White)
                                 )
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Default.ShoppingCart,
-                            contentDescription = "Escanear",
-                            modifier = Modifier.size(80.dp),
-                            tint = Color.White
+                        Image(
+                            painter = painterResource(id = R.drawable.logo),
+                            contentDescription = "Logo EcoScanner",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
                         )
                     }
 

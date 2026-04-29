@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.ecoscanner.ui.theme.EcoscannerTheme
@@ -180,7 +181,9 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
         try {
             StatsRepository.loadUserScans(supabase)
         } catch (e: Exception) {
-            StatsRepository.loadFromMemory()
+            // Si falla, limpiar datos en lugar de cargar datos antiguos
+            StatsRepository.resetLocal()
+            CarbonFootprintTracker.reset()
         }
     }
 
@@ -213,6 +216,11 @@ fun EcoscannerApp(onRequestCameraPermission: () -> Unit) {
                     onClickHistorial = { paginaSeleccionada = "Historial" },
                     onClickCerrarSesion = { 
                         SupabaseManager.logout()
+                    },
+                    onClickLimpiarHistorial = {
+                        StatsRepository.resetLocal()
+                        CarbonFootprintTracker.reset()
+                        Toast.makeText(context, "Historial y estadísticas limpiados", Toast.LENGTH_SHORT).show()
                     },
                     onOpenCamera = { onRequestCameraPermission() }
                 )

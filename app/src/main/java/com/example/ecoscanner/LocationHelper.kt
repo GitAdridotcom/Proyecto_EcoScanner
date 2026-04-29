@@ -189,16 +189,46 @@ object CarbonCalculator {
         val transportType = getTransportType(distanceKm)
         val emissionPerKm = transportEmissionsPerKm[transportType]?.toDouble() ?: 0.060
         val weightFactor = weightKg ?: 1.0
-        val co2Kg = distanceKm * emissionPerKm * weightFactor
+        
+        // Verificar si hay datos靠谱os de origen
+        val hasValidOrigin = originCountry.isNotBlank() && originCountry != "Otro"
+        val hasValidDistance = distanceKm > 0 && distanceKm < 20000 // Distancia máxima razonable: 20000 km (circunferencia terrestre)
+        
+        // Si no hay datos靠谱os, usar valores por defecto seguros
+        val co2Kg = when {
+            // Caso 1: Sin datos de origen, usar默认值 segura
+            !hasValidOrigin -> {
+                when {
+                    userCountry.contains("España") -> 0.3  // Producto local
+                    userCountry.contains("Europa") -> 1.0   // Producto europeo
+                    else -> 2.0                           // Producto internacional
+                }
+            }
+            // Caso 2: Datos existentes pero distancia fuera de rango
+            !hasValidDistance -> {
+                when {
+                    distanceKm == 0.0 -> 0.0                 // Producto local confirmado
+                    else -> 1.0                             //默认值 por distancia irreal
+                }
+            }
+            // Caso 3: Cálculo normal con límite de seguridad
+            else -> {
+                val calculated = distanceKm * emissionPerKm * weightFactor
+                minOf(calculated, 10.0) // Máximo 10 kg por producto
+            }
+        }
+        
         val message = when {
             distanceKm == 0.0 -> "Producto local - 0 emisiones de transporte"
+            !hasValidOrigin -> "Origen no verificado - CO₂ estimado"
             distanceKm < 300 -> "Transporte por carretera - Bajas emisiones"
             distanceKm < 1000 -> "Transporte nacional - Emisiones moderadas"
             distanceKm < 2500 -> "Transporte internacional - Emisiones significativas"
             distanceKm < 5000 -> "Transporte de larga distancia - Altas emisiones"
             else -> "Transporte intercontinental - Muy altas emisiones"
         }
-        return CarbonResult(co2Kg, distanceKm, originCountry, userCountry, transportType, message)
+        
+        return CarbonResult(co2Kg, minOf(distanceKm, 20000.0), originCountry, userCountry, transportType, message)
     }
 
     private fun normalizeCountry(country: String?): String {

@@ -1,7 +1,10 @@
 package com.example.ecoscanner
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,9 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.ecoscanner.ui.theme.*
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Datos(
     onVolverEscaner: () -> Unit,
@@ -45,6 +49,12 @@ fun Datos(
 
     val ultimaDistanciaKm by CarbonFootprintTracker.lastKmReduced.collectAsState()
     val ultimaDistanciaKmValue = ultimaDistanciaKm
+
+    // State for eco alternatives
+    var showAlternativesSheet by remember { mutableStateOf(false) }
+    var alternatives by remember { mutableStateOf<List<ProductData>>(emptyList()) }
+    var isLoadingAlternatives by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -590,7 +600,42 @@ fun Datos(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Eco Alternatives Button
+            val currentEcoScore = currentProduct?.ecoscoreGrade
+            if (currentProduct?.isScanned == true && !currentEcoScore.isNullOrEmpty()) {
+                Button(
+                    onClick = {
+                        val category = currentProduct.categories?.split(",")?.firstOrNull() ?: ""
+                        if (category.isNotEmpty()) {
+                            isLoadingAlternatives = true
+                            showAlternativesSheet = true
+                            scope.launch {
+                                alternatives = OpenFoodFactsApi.searchAlternatives(
+                                    category = category,
+                                    currentEcoScore = currentEcoScore,
+                                    limit = 15
+                                )
+                                isLoadingAlternatives = false
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MossGreen),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Eco,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Ver alternativas ecológicas", modifier = Modifier.padding(vertical = 8.dp))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         } else {
             // No product scanned
             Card(
@@ -642,5 +687,191 @@ fun Datos(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    // Modal Bottom Sheet for Eco Alternatives
+    if (showAlternativesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAlternativesSheet = false },
+            containerColor = SpringWood
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Alternativas Ecológicas",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Como
+                    )
+                    IconButton(onClick = { showAlternativesSheet = false }) {
+                        Icon(Icons.Default.Close, contentDescription = "Cerrar")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "Productos con mejor o igual Eco-Score en la misma categoría",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Como.copy(alpha = 0.7f)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (isLoadingAlternatives) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Tradewind)
+                    }
+                } else if (alternatives.isEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.SearchOff,
+                                contentDescription = null,
+                                tint = Como.copy(alpha = 0.5f),
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                "No se encontraron alternativas",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Como
+                            )
+                            Text(
+                                "Intenta con otro producto",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Como.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 400.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(alternatives) { alt ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Product Image
+                                    if (!alt.imageUrl.isNullOrEmpty()) {
+                                        AsyncImage(
+                                            model = alt.imageUrl,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(60.dp)
+                                                .clip(RoundedCornerShape(8.dp)),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(60.dp)
+                                                .background(GrayNurse, RoundedCornerShape(8.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Image,
+                                                contentDescription = null,
+                                                tint = Como.copy(alpha = 0.5f)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            alt.name,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Como,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        if (!alt.brand.isNullOrEmpty()) {
+                                            Text(
+                                                alt.brand,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Como.copy(alpha = 0.6f)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            // Eco Score Badge
+                                            Card(
+                                                modifier = Modifier.size(28.dp),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = Color(OpenFoodFactsApi.getEcoScoreColor(alt.ecoscoreGrade))
+                                                )
+                                            ) {
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier.fillMaxSize()
+                                                ) {
+                                                    Text(
+                                                        alt.ecoscoreGrade ?: "?",
+                                                        color = Color.White,
+                                                        fontSize = 12.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                "Origen: ${alt.origin?.take(20) ?: "?"}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Como.copy(alpha = 0.6f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { showAlternativesSheet = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Tradewind)
+                ) {
+                    Text("Cerrar")
+                }
+            }
+        }
     }
 }
