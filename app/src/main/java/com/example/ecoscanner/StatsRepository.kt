@@ -52,9 +52,10 @@ object StatsRepository {
             _isLoading.value = true
 
             val userId = supabase.auth.currentSessionOrNull()?.user?.id
+                ?: throw IllegalStateException("User not logged in")
 
             val scanData = buildJsonObject {
-                put("user_id", userId.toString())
+                put("user_id", userId)
                 put("product_code", productCode)
                 put("product_name", productName ?: "")
                 put("product_brand", productBrand ?: "")
@@ -83,19 +84,17 @@ object StatsRepository {
         return try {
             _isLoading.value = true
 
-            val currentUserId = supabase.auth.currentSessionOrNull()?.user?.id
-            
-            if (currentUserId == null) {
-                resetLocalForced()
-                return Result.success(emptyList())
-            }
+            val session = supabase.auth.currentSessionOrNull()
+            val currentUserId = session?.user?.id
+                ?: throw IllegalStateException("User not logged in")
 
             val allScans = supabase.postgrest["user_scans"]
                 .select()
                 .decodeList<UserScan>()
 
-            val userScans = allScans.filter { scan -> 
-                scan.user_id == currentUserId 
+            // Filter by exact match with trimmed strings
+            val userScans = allScans.filter { scan ->
+                scan.user_id.trim() == currentUserId.trim()
             }
 
             _userScans.value = userScans
@@ -131,5 +130,15 @@ object StatsRepository {
         _totalCo2.value = CarbonFootprintTracker.totalCo2Saved.value
         _totalKm.value = CarbonFootprintTracker.totalKmReduced.value
         _scanCount.value = CarbonFootprintTracker.scanCount.value
+    }
+
+    suspend fun deleteAllUserScans(supabase: SupabaseClient): Result<Unit> {
+        return try {
+            supabase.postgrest.rpc("delete_user_scans")
+            resetLocal()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

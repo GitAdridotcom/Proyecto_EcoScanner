@@ -24,8 +24,10 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.Postgrest
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -149,7 +151,7 @@ class MainActivity : ComponentActivity() {
 
                         try {
                             coroutineScope {
-                                StatsRepository.saveScan(
+                                val result = StatsRepository.saveScan(
                                     supabase = SupabaseManager.client,
                                     productCode = product.code,
                                     productName = product.name,
@@ -158,8 +160,12 @@ class MainActivity : ComponentActivity() {
                                     co2Kg = co2Saved,
                                     kmDistance = kmReduced
                                 )
+                                if (result.isFailure) {
+                                    Toast.makeText(this@MainActivity, "Error guardando en Supabase", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         } catch (e: Exception) {
+                            Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
 
                         val toastMessage = if (carbonResult.kmDistance > 0) {
@@ -214,12 +220,18 @@ fun EcoscannerApp(
     
 
     LaunchedEffect(Unit) {
+        // Wait for auth state to be ready
+        kotlinx.coroutines.delay(1000)
         try {
-            StatsRepository.loadUserScans(supabase)
+            val session = supabase.auth.currentSessionOrNull()
+            if (session != null && session.user != null) {
+                val result = StatsRepository.loadUserScans(supabase)
+                if (result.isFailure) {
+                    android.util.Log.e("EcoScanner", "Error loading scans: ${result.exceptionOrNull()?.message}")
+                }
+            }
         } catch (e: Exception) {
-            // Si falla, limpiar datos en lugar de cargar datos antiguos
-            StatsRepository.resetLocal()
-            CarbonFootprintTracker.reset()
+            android.util.Log.e("EcoScanner", "Error: ${e.message}")
         }
     }
 
@@ -254,9 +266,11 @@ fun EcoscannerApp(
                         SupabaseManager.logout()
                     },
                     onClickLimpiarHistorial = {
-                        StatsRepository.resetLocal()
-                        CarbonFootprintTracker.reset()
-                        Toast.makeText(context, "Historial y estadísticas limpiados", Toast.LENGTH_SHORT).show()
+                        GlobalScope.launch(Dispatchers.Main) {
+                            StatsRepository.deleteAllUserScans(SupabaseManager.client)
+                            CarbonFootprintTracker.reset()
+                            Toast.makeText(context, "Historial y estadísticas eliminados", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     onOpenCamera = { onRequestCameraPermission() }
                 )
