@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 object NavigationState {
-    var currentPage by mutableStateOf("Registro")
+    var currentPage by mutableStateOf("Auth")
 }
 
 class MainActivity : ComponentActivity() {
@@ -85,14 +85,14 @@ override fun onCreate(savedInstanceState: Bundle?) {
         
         val authPrefs = getSharedPreferences("auth_state", MODE_PRIVATE)
         val logoutRequested = authPrefs.getBoolean("logout_requested", false)
-        if (logoutRequested) {
+if (logoutRequested) {
             authPrefs.edit().remove("logout_requested").apply()
-            NavigationState.currentPage = "Registro"
+            NavigationState.currentPage = "Auth"
         } else {
             CoroutineScope(Dispatchers.Main).launch {
                 supabase.auth.loadFromStorage()
                 val hasSession = supabase.auth.currentSessionOrNull() != null
-                NavigationState.currentPage = if (hasSession) "escaner" else "Registro"
+                NavigationState.currentPage = if (hasSession) "escaner" else "Auth"
             }
         }
         
@@ -241,18 +241,10 @@ fun EcoscannerApp(
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (paginaSeleccionada) {
-            "Registro" -> {
-                Registro(
+            "Auth" -> {
+                AuthScreen(
                     supabaseClient = supabase,
-                    onClickInici = { paginaSeleccionada = "InicioSesion" },
-                    onClickRegistrarse = { paginaSeleccionada = "escaner" }
-                )
-            }
-            "InicioSesion" -> {
-                InicioSesion(
-                    supabaseClient = supabase,
-                    onClickRegistrarme = { paginaSeleccionada = "Registro" },
-                    onClickIniciar = { paginaSeleccionada = "escaner" }
+                    onAuthSuccess = { paginaSeleccionada = "escaner" }
                 )
             }
             "escaner" -> {

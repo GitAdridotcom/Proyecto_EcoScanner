@@ -19,8 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.example.ecoscanner.ui.theme.Como
-import com.example.ecoscanner.ui.theme.Tradewind
+import com.example.ecoscanner.ui.theme.*
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -28,11 +27,23 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-suspend fun registrouser(supabase: SupabaseClient, emailUser: String, passUser: String): Result<Unit> {
+suspend fun loginUser(supabase: SupabaseClient, email: String, password: String): Result<Unit> {
+    return try {
+        supabase.auth.signInWith(Email) {
+            this.email = email
+            this.password = password
+        }
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+}
+
+suspend fun registerUser(supabase: SupabaseClient, email: String, password: String): Result<Unit> {
     return try {
         supabase.auth.signUpWith(Email) {
-            email = emailUser
-            password = passUser
+            this.email = email
+            this.password = password
             data = buildJsonObject {
                 put("display_name", "Usuario Eco")
             }
@@ -44,23 +55,23 @@ suspend fun registrouser(supabase: SupabaseClient, emailUser: String, passUser: 
 }
 
 @Composable
-fun Registro(
+fun AuthScreen(
     supabaseClient: SupabaseClient,
-    onClickInici: () -> Unit,
-    onClickRegistrarse: () -> Unit
+    onAuthSuccess: () -> Unit
 ) {
-    var correo by remember { mutableStateOf("") }
-    var contraseña by remember { mutableStateOf("") }
+    var isLoginMode by remember { mutableStateOf(true) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
-    var mensaje by remember { mutableStateOf("") }
-    var cargando by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(Color(0xFF4CAF50), Color(0xFFFFFFFF))
+                    colors = listOf(Tradewind, Color.White)
                 )
             )
     ) {
@@ -87,8 +98,8 @@ fun Registro(
             Spacer(modifier = Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = correo,
-                onValueChange = { correo = it },
+                value = email,
+                onValueChange = { email = it },
                 label = { Text("Correo electrónico") },
                 singleLine = true,
                 modifier = Modifier.width(300.dp)
@@ -97,8 +108,8 @@ fun Registro(
             Spacer(modifier = Modifier.height(15.dp))
 
             OutlinedTextField(
-                value = contraseña,
-                onValueChange = { contraseña = it },
+                value = password,
+                onValueChange = { password = it },
                 label = { Text("Contraseña") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -106,9 +117,9 @@ fun Registro(
                 modifier = Modifier.width(300.dp)
             )
 
-            if (mensaje.isNotEmpty()) {
+            if (message.isNotEmpty()) {
                 Text(
-                    text = mensaje,
+                    text = message,
                     color = Color.Red,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 8.dp, start = 20.dp, end = 20.dp)
@@ -117,37 +128,44 @@ fun Registro(
 
             Spacer(modifier = Modifier.height(25.dp))
 
-            if (cargando) {
+            if (isLoading) {
                 CircularProgressIndicator(color = Como)
             } else {
                 Button(
                     onClick = {
-                        if (correo.isNotBlank() && contraseña.isNotBlank()) {
+                        if (email.isNotBlank() && password.isNotBlank()) {
+                            isLoading = true
+                            message = ""
                             scope.launch {
-                                cargando = true
-                                mensaje = ""
+                                val result = if (isLoginMode) {
+                                    loginUser(supabaseClient, email.trim(), password.trim())
+                                } else {
+                                    registerUser(supabaseClient, email.trim(), password.trim())
+                                }
 
-                                val resultado = registrouser(supabaseClient, correo.trim(), contraseña.trim())
-
-                                resultado.onSuccess {
-                                    cargando = false
-                                    onClickRegistrarse()
+                                result.onSuccess {
+                                    isLoading = false
+                                    onAuthSuccess()
                                 }.onFailure { error ->
-                                    cargando = false
-                                    mensaje = when {
-                                        error.message?.contains("short") == true -> "Contraseña demasiado corta (mín. 6)"
-                                        error.message?.contains("already") == true -> "Este correo ya está registrado"
-                                        else -> "Error: ${error.localizedMessage ?: "Fallo al conectar con el servidor"}"
+                                    isLoading = false
+                                    message = when {
+                                        isLoginMode && error.message?.contains("Invalid login credentials") == true ->
+                                            "Correo o contraseña incorrectos"
+                                        !isLoginMode && error.message?.contains("short") == true ->
+                                            "Contraseña demasiado corta (mín. 6)"
+                                        !isLoginMode && error.message?.contains("already") == true ->
+                                            "Este correo ya está registrado"
+                                        else -> "Error: ${error.localizedMessage ?: "Fallo al conectar"}"
                                     }
                                 }
                             }
                         } else {
-                            mensaje = "Rellena todos los campos"
+                            message = "Rellena todos los campos"
                         }
                     },
                     modifier = Modifier.width(280.dp)
                 ) {
-                    Text("Registrarse")
+                    Text(if (isLoginMode) "Iniciar Sesión" else "Registrarse")
                 }
             }
 
@@ -157,14 +175,14 @@ fun Registro(
                 modifier = Modifier.width(280.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text("Ya tengo una cuenta. ")
+                Text(if (isLoginMode) "¿No tienes cuenta? " else "Ya tengo una cuenta. ")
                 Text(
-                    text = "Iniciar Sesión",
+                    text = if (isLoginMode) "Regístrate aquí" else "Iniciar Sesión",
                     style = TextStyle(
                         textDecoration = TextDecoration.Underline,
                         color = Tradewind
                     ),
-                    modifier = Modifier.clickable { onClickInici() }
+                    modifier = Modifier.clickable { isLoginMode = !isLoginMode }
                 )
             }
         }
