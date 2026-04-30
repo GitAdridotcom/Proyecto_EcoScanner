@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
+
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -59,7 +60,6 @@ class MainActivity : ComponentActivity() {
                 try {
                     LocationHelper.getUserLocation(this@MainActivity)
                 } catch (e: Exception) {
-                    // Silent fail - will use default calculations
                 }
             }
         }
@@ -127,7 +127,6 @@ if (logoutRequested) {
                 )
             )
         } else if (!fineLocation && coarseLocation) {
-            // Only coarse granted, request fine
             locationPermissionLauncher.launch(
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
             )
@@ -186,7 +185,6 @@ if (logoutRequested) {
                                 )
                             }
                         } catch (e: Exception) {
-                            // Silently ignore - data is saved
                         }
 
                         val toastMessage = if (carbonResult.kmDistance > 0) {

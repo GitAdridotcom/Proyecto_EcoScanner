@@ -42,7 +42,4 @@ object ProductRepository {
         _lastScannedProduct.value = product
     }
 
-    fun clearProduct() {
-        _lastScannedProduct.value = null
     }
-}

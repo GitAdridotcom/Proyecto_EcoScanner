@@ -36,7 +36,6 @@ object LocationHelper {
         if (fusedLocationClient == null) {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         }
-        // Check for location permissions before attempting to access location
         val hasFine = ContextCompat.checkSelfPermission(
             context,
             android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -62,7 +61,6 @@ object LocationHelper {
                 }
             }
             if (location != null) {
-                // Resolve country and city via reverse geocoding if possible
                 val countryCity = resolveCountryCity(context, location.latitude, location.longitude)
                 val country = countryCity?.first ?: "Desconocido"
                 val city = countryCity?.second ?: "Desconocido"
@@ -77,7 +75,6 @@ object LocationHelper {
                 null
             }
         } catch (e: Exception) {
-            // log and return null to signal location could not be retrieved
             Log.e("LocationHelper", "Error fetching user location", e)
             null
         }

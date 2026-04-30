@@ -32,11 +32,4 @@ object CarbonFootprintTracker {
         _scanCount.value = 0
     }
 
-    fun getFormattedCo2(): String {
-        return String.format("%.2f", _totalCo2Saved.value)
     }
-
-    fun getFormattedKm(): String {
-        return String.format("%.1f", _totalKmReduced.value)
-    }
-}

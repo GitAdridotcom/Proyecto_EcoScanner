@@ -43,12 +43,6 @@ fun HistorialScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            "Historial de Escaneos",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Como
-        )
 
         Spacer(modifier = Modifier.height(8.dp))
 

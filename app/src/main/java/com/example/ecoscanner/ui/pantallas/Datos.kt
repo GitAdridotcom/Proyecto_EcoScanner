@@ -68,27 +68,13 @@ fun Datos(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Header
-        Text(
-            "Datos del Producto",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Como
-        )
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        Text(
-            if (currentProduct?.isScanned == true) currentProduct?.name ?: "Producto escaneado"
-            else "Escanea un producto para ver sus datos",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Como.copy(alpha = 0.7f)
-        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         if (currentProduct?.isScanned == true) {
-            // Product Image Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),

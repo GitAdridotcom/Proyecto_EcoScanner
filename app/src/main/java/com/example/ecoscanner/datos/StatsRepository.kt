@@ -105,18 +105,11 @@ object StatsRepository {
 
             Result.success(userScans)
         } catch (e: Exception) {
-            resetLocalForced()
+            resetLocal()
             Result.failure(e)
         } finally {
             _isLoading.value = false
         }
-    }
-
-    private fun resetLocalForced() {
-        _userScans.value = emptyList()
-        _totalCo2.value = 0.0
-        _totalKm.value = 0.0
-        _scanCount.value = 0
     }
 
     fun resetLocal() {
