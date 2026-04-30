@@ -186,13 +186,13 @@ fun Datos(
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .background(Color(0xFFFFF3E0), CircleShape),
+                                    .background(AmberAlert.copy(alpha = 0.2f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     Icons.Default.Factory,
                                     contentDescription = null,
-                                    tint = Color(0xFFE65100),
+                                    tint = AmberAlert,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -214,7 +214,7 @@ fun Datos(
                             String.format("%.2f kg", co2Estimado),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFE65100)
+                            color = AmberAlert
                         )
                     }
 
@@ -232,7 +232,7 @@ fun Datos(
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .background(Color(0xFFE8F5E9), CircleShape),
+                                    .background(MossGreen. copy(0.2f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -271,10 +271,10 @@ fun Datos(
                             Text(
                                 statusLabel,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = when {
-                                    ultimaDistanciaKmValue < 1000 -> MossGreen
-                                    ultimaDistanciaKmValue < 5000 -> Color(0xFFFFA000)
-                                    else -> Color(0xFFD32F2F)
+color = when {
+                                    ultimaDistanciaKmValue < 1_000 -> MossGreen
+                                    ultimaDistanciaKmValue < 5_000 -> AmberAlert
+                                    else -> CoralAlert
                                 }
                             )
                         }
@@ -294,14 +294,14 @@ fun Datos(
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .background(Color(0xFFE3F2FD), CircleShape),
+                                    .background(TealInfo.copy(alpha = 0.2f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     Icons.Default.Public,
                                     contentDescription = null,
-                                    tint = Color(0xFF1976D2),
-                                    modifier = Modifier.size(20.dp)
+                                    tint = TealInfo,
+                                    modifier = Modifier.size(20. dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -322,7 +322,7 @@ fun Datos(
                             originNormalizado,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1976D2)
+                            color = TealInfo
                         )
                     }
                 }
@@ -408,7 +408,7 @@ fun Datos(
                         Icon(
                             Icons.Default.Restaurant,
                             contentDescription = null,
-                            tint = Color(0xFF4CAF50),
+                            tint = Tradewind,
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))

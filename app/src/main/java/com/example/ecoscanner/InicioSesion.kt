@@ -19,6 +19,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.example.ecoscanner.ui.theme.Como
+import com.example.ecoscanner.ui.theme.Tradewind
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -71,7 +73,7 @@ fun InicioSesion(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                "Tu impacto ambiental, en un escaneo.",
+                "Haz visible lo invisible del consumo.",
                 modifier = Modifier.width(200.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyMedium
@@ -111,7 +113,7 @@ fun InicioSesion(
             Spacer(modifier = Modifier.height(30.dp))
 
             if (cargando) {
-                CircularProgressIndicator(color = Color(0xFF1B5E20))
+                CircularProgressIndicator(color = Como)
             } else {
                 Button(
                     onClick = {
@@ -150,7 +152,7 @@ fun InicioSesion(
                     text = "Regístrate aquí",
                     style = TextStyle(
                         textDecoration = TextDecoration.Underline,
-                        color = Color(0xFF1B5E20)
+                        color = Tradewind
                     ),
                     modifier = Modifier.clickable { onClickRegistrarme() }
                 )

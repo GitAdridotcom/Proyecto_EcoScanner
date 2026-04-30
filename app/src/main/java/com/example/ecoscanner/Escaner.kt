@@ -10,8 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -86,7 +86,7 @@ fun Escaner(
                     Button(
                         onClick = { onClickLimpiarHistorial() },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                        colors = ButtonDefaults.buttonColors(containerColor = AmberAlert)
                     ) {
                         Icon(
                             Icons.Default.CleaningServices,
@@ -152,7 +152,7 @@ fun Escaner(
                             .clip(RoundedCornerShape(24.dp))
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(GrayNurse, Color.White)
+                                    colors = listOf(SpringWood, Color.White)
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -190,7 +190,7 @@ fun Escaner(
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Icon(
-                            Icons.Default.ShoppingCart,
+                            Icons.Default.QrCodeScanner,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
                             tint = Color.White

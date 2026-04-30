@@ -134,13 +134,13 @@ fun HistorialScreen(
                                 Text(
                                     "${String.format("%.1f", scan.co2_kg)} kg",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Color(0xFFE65100),
+                                    color = AmberAlert,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     "CO₂",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFE65100)
+                                    color = AmberAlert
                                 )
                             }
                         }

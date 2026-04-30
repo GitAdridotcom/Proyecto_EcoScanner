@@ -104,7 +104,7 @@ fun Estadisticas(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+                colors = CardDefaults.cardColors(containerColor = MossGreen.copy(alpha = 0.3f))
             ) {
                 Column(
                     modifier = Modifier
@@ -135,7 +135,7 @@ fun Estadisticas(
             Button(
                 onClick = { onVolverEscaner() },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                colors = ButtonDefaults.buttonColors(containerColor = Tradewind),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Volver al Escáner")
