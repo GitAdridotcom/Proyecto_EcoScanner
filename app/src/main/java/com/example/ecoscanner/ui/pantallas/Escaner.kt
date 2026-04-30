@@ -43,7 +43,7 @@ fun Escaner(
                 Column(modifier = Modifier.padding(horizontal = 12.dp)) {
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "EcoScanner Menu",
+                        "Menú",
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.titleLarge,
                         color = Como
@@ -133,9 +133,7 @@ fun Escaner(
                     .fillMaxSize()
                     .padding(padding)
                     .background(
-                        Brush.verticalGradient(
-                            colors = listOf(SpringWood, GrayNurse)
-                        )
+                       Color.White
                     )
             ) {
                 Column(
@@ -149,11 +147,8 @@ fun Escaner(
                     Box(
                         modifier = Modifier
                             .size(180.dp)
-                            .clip(RoundedCornerShape(24.dp))
                             .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(SpringWood, Color.White)
-                                )
+                               Color.Transparent
                             ),
                         contentAlignment = Alignment.Center
                     ) {

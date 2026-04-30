@@ -708,7 +708,7 @@ color = when {
         ) {
             Icon(Icons.Default.QrCodeScanner, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Escanear Producto", modifier = Modifier.padding(vertical = 8.dp))
+            Text("Volver al escáner", modifier = Modifier.padding(vertical = 8.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -3,7 +3,7 @@ package com.example.ecoscanner.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // New EcoScanner Palette - Nature-inspired
-val SpringWood = Color(0xFFF4F7F4)      // Fondo claro principal
+val SpringWood = Color(0xFFF2F2F2)      // Fondo claro principal
 val GrayNurse = Color(0xFFE5EBE7)        // Fondo secundario
 val MossGreen = Color(0xFFB5D6B3)       // Acento verde claro
 val Tradewind = Color(0xFF3D8B6E)        // Verde principal
