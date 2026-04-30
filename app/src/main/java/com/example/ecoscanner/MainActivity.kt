@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.ecoscanner.ui.theme.EcoscannerTheme
+import com.example.ecoscanner.ui.theme.Tradewind
 import com.google.zxing.integration.android.IntentIntegrator
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
@@ -83,26 +84,39 @@ override fun onCreate(savedInstanceState: Bundle?) {
         SupabaseManager.setClient(supabase)
         SupabaseManager.setActivity(this)
         
+        var isLoadingSession by mutableStateOf(true)
+        
         val authPrefs = getSharedPreferences("auth_state", MODE_PRIVATE)
         val logoutRequested = authPrefs.getBoolean("logout_requested", false)
-if (logoutRequested) {
+        if (logoutRequested) {
             authPrefs.edit().remove("logout_requested").apply()
             NavigationState.currentPage = "Auth"
+            isLoadingSession = false
         } else {
             CoroutineScope(Dispatchers.Main).launch {
                 supabase.auth.loadFromStorage()
                 val hasSession = supabase.auth.currentSessionOrNull() != null
                 NavigationState.currentPage = if (hasSession) "escaner" else "Auth"
+                isLoadingSession = false
             }
         }
         
         setContent {
             EcoscannerTheme {
-                EcoscannerApp(
-                    supabase = supabase,
-                    onRequestCameraPermission = { requestCameraPermission() },
-                    onRequestLocationPermission = { requestLocationPermission() }
-                )
+                if (isLoadingSession) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Tradewind)
+                    }
+                } else {
+                    EcoscannerApp(
+                        supabase = supabase,
+                        onRequestCameraPermission = { requestCameraPermission() },
+                        onRequestLocationPermission = { requestLocationPermission() }
+                    )
+                }
             }
         }
     }
