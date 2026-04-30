@@ -44,6 +44,7 @@ object OpenFoodFactsApi {
 
             val nutriments = product["nutriments"]?.jsonObject
             val ecoScoreData = product["ecoscore_data"]?.jsonObject
+            val agribalyseData = ecoScoreData?.get("agribalyse")?.jsonObject
 
             // Determine weight in kilograms if available
             val weightKgValue = run {
@@ -67,7 +68,18 @@ object OpenFoodFactsApi {
                     ?: product["categories"]?.jsonPrimitive?.content,
                 nutriscoreGrade = product["nutriscore_grade"]?.jsonPrimitive?.content?.uppercase(),
                 ecoscoreGrade = product["ecoscore_grade"]?.jsonPrimitive?.content?.uppercase(),
-                carbonFootprint = ecoScoreData?.get("climate_impact")?.jsonPrimitive?.content?.toDoubleOrNull(),
+                carbonFootprint = agribalyseData?.get("co2_total")?.jsonPrimitive?.content?.toDoubleOrNull(),
+                carbonFootprintEquivalent = agribalyseData?.get("equivalent")?.jsonPrimitive?.content
+                    ?: run {
+                        val co2 = agribalyseData?.get("co2_total")?.jsonPrimitive?.content?.toDoubleOrNull()
+                        if (co2 != null && co2 > 0) {
+                            val kmCar = co2 * 2500
+                            when {
+                                kmCar >= 1000 -> "${String.format("%.1f", kmCar / 1000)} km en coche"
+                                else -> "${String.format("%.0f", kmCar)} m en coche"
+                            }
+                        } else null
+                    },
                 nutriments = NutrientsData(
                     calories = nutriments?.get("energy-kcal_100g")?.jsonPrimitive?.content?.toDoubleOrNull(),
                     fat = nutriments?.get("fat_100g")?.jsonPrimitive?.content?.toDoubleOrNull(),

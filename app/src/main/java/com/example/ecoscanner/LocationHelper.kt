@@ -253,8 +253,9 @@ object CarbonCalculator {
         return buildResult(displayOrigin, userCountryNorm, distanceKm)
     }
 
-    fun calculateCarbonFootprintWithCoordinates(productOrigin: String?, userLat: Double?, userLon: Double?, weightKg: Double? = null): CarbonResult {
+    fun calculateCarbonFootprintWithCoordinates(productOrigin: String?, userLat: Double?, userLon: Double?, userCountry: String?, weightKg: Double? = null): CarbonResult {
         val normalizedOrigin = normalizeCountry(productOrigin)
+        val normalizedUserCountry = normalizeCountry(userCountry)
         val displayOrigin = if (normalizedOrigin == "Otro" && !productOrigin.isNullOrBlank()) 
             translateCountryToSpanish(productOrigin) else normalizedOrigin
         
@@ -263,7 +264,7 @@ object CarbonCalculator {
                 co2Kg = 0.0,
                 kmDistance = 0.0,
                 originCountry = "España",
-                userCountry = if (userLat != null && userLon != null) "Tu ubicación" else "España",
+                userCountry = normalizedUserCountry.takeIf { it != "Otro" } ?: "España",
                 transportType = "local",
                 message = "Origen no especificado - asumido local (España)"
             )
@@ -275,54 +276,54 @@ object CarbonCalculator {
             if (originCoords != null) {
                 LocationHelper.calculateHaversineDistance(userLat, userLon, originCoords.latitude, originCoords.longitude)
             } else {
-                getDistanceFromCountries(countryForDistance, "España")
+                getDistanceFromCountries(countryForDistance, normalizedUserCountry.takeIf { it != "Otro" } ?: "España")
             }
         } else {
-            getDistanceFromCountries(countryForDistance, "España")
+            getDistanceFromCountries(countryForDistance, normalizedUserCountry.takeIf { it != "Otro" } ?: "España")
         }
-        val userCountry = if (userLat != null && userLon != null) "Tu ubicación" else "España"
-        return buildResult(displayOrigin, userCountry, distanceKm, weightKg)
+        return buildResult(displayOrigin, normalizedUserCountry.takeIf { it != "Otro" } ?: "España", distanceKm, weightKg)
     }
 
     private fun buildResult(originCountry: String, userCountry: String, distanceKm: Double, weightKg: Double? = null): CarbonResult {
         val hasValidOrigin = originCountry.isNotBlank() && originCountry != "Otro"
-        val hasValidDistance = distanceKm > 0 && distanceKm < 20000
+        val userCountryNorm = normalizeCountry(userCountry)
+        val originIsSameAsUser = hasValidOrigin && userCountryNorm != "Otro" && originCountry.equals(userCountryNorm, ignoreCase = true)
+        val effectiveDistance = if (!hasValidOrigin || originIsSameAsUser) 0.0 else distanceKm
+        val hasValidDistance = effectiveDistance > 0 && effectiveDistance < 20000
         
-        val effectiveDistance = if (!hasValidOrigin) 0.0 else distanceKm
         val transportType = getTransportType(effectiveDistance)
         val emissionPerKm = transportEmissionsPerKm[transportType]?.toDouble() ?: 0.060
         val weightFactor = weightKg ?: 1.0
         
         val co2Kg = when {
-            !hasValidOrigin -> {
+            !hasValidOrigin || originIsSameAsUser -> {
                 0.0
             }
             !hasValidDistance -> {
                 when {
-                    distanceKm == 0.0 -> 0.0
+                    effectiveDistance == 0.0 -> 0.0
                     else -> 1.0
                 }
             }
             else -> {
-                val calculated = distanceKm * emissionPerKm * weightFactor
+                val calculated = effectiveDistance * emissionPerKm * weightFactor
                 minOf(calculated, 10.0)
             }
         }
         
         val message = when {
-            !hasValidOrigin -> "Origen no especificado - asumido local (España)"
-            distanceKm == 0.0 -> "Producto local - 0 emisiones de transporte"
-            distanceKm < 300 -> "Transporte por carretera - Bajas emisiones"
-            distanceKm < 1000 -> "Transporte nacional - Emisiones moderadas"
-            distanceKm < 2500 -> "Transporte internacional - Emisiones significativas"
-            distanceKm < 5000 -> "Transporte de larga distancia - Altas emisiones"
+            !hasValidOrigin || originIsSameAsUser -> "Producto local - 0 emisiones de transporte"
+            effectiveDistance < 300 -> "Transporte por carretera - Bajas emisiones"
+            effectiveDistance < 1000 -> "Transporte nacional - Emisiones moderadas"
+            effectiveDistance < 2500 -> "Transporte internacional - Emisiones significativas"
+            effectiveDistance < 5000 -> "Transporte de larga distancia - Altas emisiones"
             else -> "Transporte intercontinental - Muy altas emisiones"
         }
         
-        val finalDistance = if (!hasValidOrigin) 0.0 else minOf(distanceKm, 20000.0)
+        val finalDistance = if (!hasValidOrigin || originIsSameAsUser) 0.0 else minOf(distanceKm, 20000.0)
         val finalOriginCountry = if (!hasValidOrigin) "España" else originCountry
         
-        return CarbonResult(co2Kg, finalDistance, finalOriginCountry, userCountry, transportType, message)
+        return CarbonResult(co2Kg, finalDistance, finalOriginCountry, userCountryNorm, transportType, message)
     }
 
     private fun normalizeCountry(country: String?): String {
@@ -331,7 +332,7 @@ object CarbonCalculator {
             .replace("á", "a").replace("é", "e").replace("í", "i")
             .replace("ó", "o").replace("ú", "u").replace("ñ", "n")
         return when {
-            normalized.contains("espana") || normalized.contains("spain") -> "España"
+            normalized.contains("espana") || normalized.contains("spain") || normalized.contains("espagne") -> "España"
             normalized.contains("portugal") -> "Portugal"
             normalized.contains("francia") || normalized.contains("france") -> "Francia"
             normalized.contains("italia") || normalized.contains("italy") -> "Italia"
@@ -345,7 +346,7 @@ object CarbonCalculator {
         if (country.isNullOrBlank()) return country ?: ""
         val normalized = country.lowercase().trim()
         return when {
-            normalized.contains("spain") || normalized.contains("espana") -> "España"
+            normalized.contains("spain") || normalized.contains("espana") || normalized.contains("espagne") -> "España"
             normalized.contains("portugal") -> "Portugal"
             normalized.contains("france") || normalized.contains("francia") -> "Francia"
             normalized.contains("italy") || normalized.contains("italia") -> "Italia"

@@ -16,6 +16,7 @@ data class ProductData(
     val nutriscoreGrade: String? = null,
     val ecoscoreGrade: String? = null,
     val carbonFootprint: Double? = null,
+    val carbonFootprintEquivalent: String? = null,
     val nutriments: NutrientsData = NutrientsData(),
     val ingredients: String = "",
     val weightKg: Double? = null,

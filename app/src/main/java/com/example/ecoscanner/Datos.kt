@@ -526,8 +526,9 @@ fun Datos(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Categories Card
-            if (!currentProduct.categories.isNullOrEmpty()) {
+            // Carbon Footprint Card from API
+            val hasCarbonData = currentProduct?.carbonFootprint != null || !currentProduct?.carbonFootprintEquivalent.isNullOrEmpty()
+            if (currentProduct?.isScanned == true && hasCarbonData) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -541,27 +542,61 @@ fun Datos(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                Icons.Default.Category,
+                                Icons.Default.Cloud,
                                 contentDescription = null,
                                 tint = Tradewind,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "Categorías",
+                                "Huella de carbono",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Como
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            currentProduct.categories,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Como.copy(alpha = 0.7f),
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        currentProduct.carbonFootprint?.let { cf ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "Impacto climático",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Como.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    "${String.format("%.1f", cf)} kg CO₂/kg",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Tradewind
+                                )
+                            }
+                        }
+
+                        currentProduct.carbonFootprintEquivalent?.let { eq ->
+                            if (eq.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                HorizontalDivider(color = Como.copy(alpha = 0.1f))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "Equivalencia",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Tradewind
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    eq,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Tradewind
+                                )
+                            }
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))

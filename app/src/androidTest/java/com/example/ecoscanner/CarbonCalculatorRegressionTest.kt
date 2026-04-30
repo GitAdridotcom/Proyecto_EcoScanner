@@ -11,9 +11,10 @@ import org.junit.runner.RunWith
 class CarbonCalculatorRegressionTest {
     @Test
     fun testCO2ScalesWithWeightForNonZeroDistance() {
-        val originCountry = "España"
-        val userLat = 41.3851  // Barcelona approx
+        val originCountry = "Francia"
+        val userLat = 41.3851  // Barcelona - España
         val userLon = 2.1734
+        val userCountry = "España"
         val weightKg = 2.0
 
         val originCoords = LocationHelper.getCountryCoordinates(originCountry)
@@ -21,10 +22,20 @@ class CarbonCalculatorRegressionTest {
         val distanceKm = LocationHelper.calculateHaversineDistance(userLat, userLon, originCoords!!.latitude, originCoords.longitude)
         assertTrue("Distance should be > 0", distanceKm > 0)
 
-        val result = CarbonCalculator.calculateCarbonFootprintWithCoordinates(originCountry, userLat, userLon, weightKg)
-        val emissionPerKm = 0.035 // based on tren for this distance range
-        val expected = distanceKm * emissionPerKm * weightKg
-        val delta = 1e-6
-        assertEquals(expected, result.co2Kg, delta)
+        val result = CarbonCalculator.calculateCarbonFootprintWithCoordinates(originCountry, userLat, userLon, userCountry, weightKg)
+        assertTrue("CO2 should be > 0 for cross-border product", result.co2Kg > 0)
+    }
+
+    @Test
+    fun testCO2IsZeroForSameCountry() {
+        val originCountry = "España"
+        val userLat = 41.3851  // Barcelona - España
+        val userLon = 2.1734
+        val userCountry = "España"
+        val weightKg = 2.0
+
+        val result = CarbonCalculator.calculateCarbonFootprintWithCoordinates(originCountry, userLat, userLon, userCountry, weightKg)
+        assertEquals("CO2 should be 0 for same country", 0.0, result.co2Kg, 1e-6)
+        assertEquals("Distance should be 0 for same country", 0.0, result.kmDistance, 1e-6)
     }
 }

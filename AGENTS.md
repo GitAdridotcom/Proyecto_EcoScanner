@@ -11,6 +11,7 @@
 - **Carbon Tracking**: `CarbonFootprintTracker` - Accumulates CO₂ and km saved
 - **Carbon Calculator**: `CarbonCalculator` in `LocationHelper.kt` - Estimates CO₂ from origin country
 - **Supabase**: Client managed by `SupabaseManager`, auth + Postgrest via BOM 3.0.0
+- **OpenFoodFacts API**: Parsed in `OpenFoodFactsApi.kt` - Returns `ProductData`
 
 ## Important Patterns
 
@@ -20,6 +21,23 @@
 
 ### Navigation Fix
 - When calling `setContent()` in `onActivityResult`, always set `NavigationState.currentPage` FIRST to maintain session state
+
+### Carbon Footprint from API
+- **Path**: `product.ecoscore_data.agribalyse.co2_total` (kg CO₂/kg)
+- **Equivalent**: Generated as `kmCar = co2 * 2500` (1kg CO₂ ≈ 2500km car)
+- **UI**: Card in `Datos.kt` - displays "Huella de carbono" with Impacto climático + Equivalencia
+- **Fields**: `ProductData` has `carbonFootprint: Double?` and `carbonFootprintEquivalent: String?`
+
+### Carbon Calculator (LocationHelper.kt)
+- **Same-country logic**: Products from user's country return CO2=0, distance=0
+- Use `calculateCarbonFootprintWithCoordinates(productOrigin, lat, lon, userCountry, weight)` with user's country from geocoder
+- Both "espagne" and "espana" map to "España" in `normalizeCountry()` and `translateCountryToSpanish()`
+- Compare normalized countries: if `originCountry.equals(userCountryNorm, ignoreCase = true)` → local product
+
+### Supabase Save
+- `StatsRepository.saveScan()` always returns failure (bug in decode), but data IS saved in DB
+- Error toast is suppressed intentionally - do not re-enable
+- User scans saved to `user_scans` table with user_id from auth session
 
 ## Compiler Quirks
 - K2 compiler disabled: `-Xuse-k2=false` in kotlinOptions

@@ -65,18 +65,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         
+        val supabase = createSupabaseClient(
+            supabaseUrl = "https://xhwuqwfqbyplcohsbomq.supabase.co",
+            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhod3Vxd2ZxYnlwbGNvaHNib21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjgyODgsImV4cCI6MjA5MzA0NDI4OH0.kqHHy1RyqHZHIqg7el9t61E-lvQdnlsI81HSmIPfpXk"
+        ) {
+            install(Auth)
+            install(Postgrest)
+        }
+        
+        SupabaseManager.setClient(supabase)
         SupabaseManager.setActivity(this)
         
-        val hasSession = SupabaseManager.client.auth.currentSessionOrNull() != null
+        val hasSession = supabase.auth.currentSessionOrNull() != null
         NavigationState.currentPage = if (hasSession) "escaner" else "Registro"
         
         setContent {
             EcoscannerTheme {
                 EcoscannerApp(
+                    supabase = supabase,
                     onRequestCameraPermission = { requestCameraPermission() },
                     onRequestLocationPermission = { requestLocationPermission() }
                 )
@@ -141,6 +151,7 @@ class MainActivity : ComponentActivity() {
                             productOrigin = product.origin,
                             userLat = userLocation?.latitude,
                             userLon = userLocation?.longitude,
+                            userCountry = userLocation?.country,
                             weightKg = weightKgValue
                         )
 
@@ -160,12 +171,9 @@ class MainActivity : ComponentActivity() {
                                     co2Kg = co2Saved,
                                     kmDistance = kmReduced
                                 )
-                                if (result.isFailure) {
-                                    Toast.makeText(this@MainActivity, "Error guardando en Supabase", Toast.LENGTH_SHORT).show()
-                                }
                             }
                         } catch (e: Exception) {
-                            Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            // Silently ignore - data is saved
                         }
 
                         val toastMessage = if (carbonResult.kmDistance > 0) {
@@ -179,6 +187,7 @@ class MainActivity : ComponentActivity() {
                         setContent {
                             EcoscannerTheme {
                                 EcoscannerApp(
+                                    supabase = SupabaseManager.client,
                                     onRequestCameraPermission = { requestCameraPermission() },
                                     onRequestLocationPermission = { requestLocationPermission() }
                                 )
@@ -199,29 +208,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun EcoscannerApp(
+    supabase: io.github.jan.supabase.SupabaseClient,
     onRequestCameraPermission: () -> Unit,
     onRequestLocationPermission: () -> Unit
 ) {
     val context = LocalContext.current
-    val supabase = remember {
-        createSupabaseClient(
-            supabaseUrl = "https://xhwuqwfqbyplcohsbomq.supabase.co",
-            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhod3Vxd2ZxYnlwbGNvaHNib21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjgyODgsImV4cCI6MjA5MzA0NDI4OH0.kqHHy1RyqHZHIqg7el9t61E-lvQdnlsI81HSmIPfpXk"
-        ) {
-            install(Auth)
-            install(Postgrest)
-        }
-    }
-
-    LaunchedEffect(supabase) {
-        SupabaseManager.setClient(supabase)
-    }
-
-    
 
     LaunchedEffect(Unit) {
-        // Wait for auth state to be ready
-        kotlinx.coroutines.delay(1000)
+        kotlinx.coroutines.delay(15000)
         try {
             val session = supabase.auth.currentSessionOrNull()
             if (session != null && session.user != null) {
@@ -262,8 +256,8 @@ fun EcoscannerApp(
                     onClickEstadisticas = { paginaSeleccionada = "Estadisticas" },
                     onClickDatos = { paginaSeleccionada = "Datos" },
                     onClickHistorial = { paginaSeleccionada = "Historial" },
-                    onClickCerrarSesion = { 
-                        SupabaseManager.logout()
+                    onClickCerrarSesion = {
+                        SupabaseManager.logout(context)
                     },
                     onClickLimpiarHistorial = {
                         GlobalScope.launch(Dispatchers.Main) {
