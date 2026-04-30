@@ -69,15 +69,14 @@ object OpenFoodFactsApi {
                 nutriscoreGrade = product["nutriscore_grade"]?.jsonPrimitive?.content?.uppercase(),
                 ecoscoreGrade = product["ecoscore_grade"]?.jsonPrimitive?.content?.uppercase(),
                 carbonFootprint = agribalyseData?.get("co2_total")?.jsonPrimitive?.content?.toDoubleOrNull(),
-                carbonFootprintEquivalent = agribalyseData?.get("equivalent")?.jsonPrimitive?.content
+                carbonFootprintEquivalent = agribalyseData?.get("equivalent")?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+                    ?: ecoScoreData?.get("equivalent")?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+                    ?: product["equivalent_food_conso_100g"]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
                     ?: run {
                         val co2 = agribalyseData?.get("co2_total")?.jsonPrimitive?.content?.toDoubleOrNull()
                         if (co2 != null && co2 > 0) {
-                            val kmCar = co2 * 2500
-                            when {
-                                kmCar >= 1000 -> "${String.format("%.1f", kmCar / 1000)} km en coche"
-                                else -> "${String.format("%.0f", kmCar)} m en coche"
-                            }
+                            val kmCar = co2 * 0.51
+                            if (kmCar >= 1) "Equivale a conducir ${String.format("%.1f", kmCar)} km en coche de gasolina" else "Equivale a conducir ${String.format("%.0f", kmCar * 1000)} m en coche de gasolina"
                         } else null
                     },
                 nutriments = NutrientsData(

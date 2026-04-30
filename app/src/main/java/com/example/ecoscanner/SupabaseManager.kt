@@ -26,6 +26,9 @@ object SupabaseManager {
         val prefs = context.getSharedPreferences("supabase_session", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
 
+        val authPrefs = context.getSharedPreferences("auth_state", Context.MODE_PRIVATE)
+        authPrefs.edit().putBoolean("logout_requested", true).apply()
+
         _client = null
 
         activityRef?.get()?.let { activity ->

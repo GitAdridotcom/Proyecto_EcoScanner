@@ -302,12 +302,11 @@ object CarbonCalculator {
             !hasValidDistance -> {
                 when {
                     effectiveDistance == 0.0 -> 0.0
-                    else -> 1.0
+                    else -> 0.5
                 }
             }
             else -> {
-                val calculated = effectiveDistance * emissionPerKm * weightFactor
-                minOf(calculated, 10.0)
+                effectiveDistance * emissionPerKm * weightFactor
             }
         }
         
@@ -472,7 +471,7 @@ object CarbonCalculator {
                 destCoords.longitude
             )
         }
-        return 500.0
+        return 100.0
     }
 
     private fun getTransportType(distanceKm: Double): String = when {

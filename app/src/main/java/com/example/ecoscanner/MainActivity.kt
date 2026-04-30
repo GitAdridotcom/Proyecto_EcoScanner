@@ -73,15 +73,28 @@ override fun onCreate(savedInstanceState: Bundle?) {
             supabaseUrl = "https://xhwuqwfqbyplcohsbomq.supabase.co",
             supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhod3Vxd2ZxYnlwbGNvaHNib21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NjgyODgsImV4cCI6MjA5MzA0NDI4OH0.kqHHy1RyqHZHIqg7el9t61E-lvQdnlsI81HSmIPfpXk"
         ) {
-            install(Auth)
+            install(Auth) {
+                enableLifecycleCallbacks = false
+                alwaysAutoRefresh = true
+            }
             install(Postgrest)
         }
         
         SupabaseManager.setClient(supabase)
         SupabaseManager.setActivity(this)
         
-        val hasSession = supabase.auth.currentSessionOrNull() != null
-        NavigationState.currentPage = if (hasSession) "escaner" else "Registro"
+        val authPrefs = getSharedPreferences("auth_state", MODE_PRIVATE)
+        val logoutRequested = authPrefs.getBoolean("logout_requested", false)
+        if (logoutRequested) {
+            authPrefs.edit().remove("logout_requested").apply()
+            NavigationState.currentPage = "Registro"
+        } else {
+            CoroutineScope(Dispatchers.Main).launch {
+                supabase.auth.loadFromStorage()
+                val hasSession = supabase.auth.currentSessionOrNull() != null
+                NavigationState.currentPage = if (hasSession) "escaner" else "Registro"
+            }
+        }
         
         setContent {
             EcoscannerTheme {
@@ -184,15 +197,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
                         Toast.makeText(this@MainActivity, toastMessage, Toast.LENGTH_LONG).show()
 
                         NavigationState.currentPage = "escaner"
-                        setContent {
-                            EcoscannerTheme {
-                                EcoscannerApp(
-                                    supabase = SupabaseManager.client,
-                                    onRequestCameraPermission = { requestCameraPermission() },
-                                    onRequestLocationPermission = { requestLocationPermission() }
-                                )
-                            }
-                        }
                     } else {
                         Toast.makeText(this@MainActivity, "Producto no encontrado en la base de datos", Toast.LENGTH_LONG).show()
                     }
@@ -266,7 +270,8 @@ fun EcoscannerApp(
                             Toast.makeText(context, "Historial y estadísticas eliminados", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    onOpenCamera = { onRequestCameraPermission() }
+                    onOpenCamera = { onRequestCameraPermission() },
+                    onClickPoliticaPrivacidad = { paginaSeleccionada = "PoliticaPrivacidad" }
                 )
             }
             "Estadisticas" -> {
@@ -286,6 +291,13 @@ fun EcoscannerApp(
             "Historial" -> {
                 HistorialScreen(
                     onVolverEscaner = { paginaSeleccionada = "escaner" },
+                    onClickDatos = { paginaSeleccionada = "Datos" },
+                    onClickEstadisticas = { paginaSeleccionada = "Estadisticas" }
+                )
+            }
+            "PoliticaPrivacidad" -> {
+                PoliticaPrivacidad(
+                    onVolver = { paginaSeleccionada = "escaner" },
                     onClickDatos = { paginaSeleccionada = "Datos" },
                     onClickEstadisticas = { paginaSeleccionada = "Estadisticas" }
                 )

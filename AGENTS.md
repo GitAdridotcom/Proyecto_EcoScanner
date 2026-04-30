@@ -21,6 +21,25 @@
 
 ### Navigation Fix
 - When calling `setContent()` in `onActivityResult`, always set `NavigationState.currentPage` FIRST to maintain session state
+- NEVER call `setContent` after successful scan - only update `NavigationState.currentPage`
+
+### Session Persistence (Critical)
+- Supabase Auth config must include:
+  ```kotlin
+  install(Auth) {
+      enableLifecycleCallbacks = false  // Prevents session clearing on background
+      alwaysAutoRefresh = true           // Keeps tokens valid
+  }
+  ```
+- Load session manually on app start:
+  ```kotlin
+  CoroutineScope(Dispatchers.Main).launch {
+      supabase.auth.loadFromStorage()
+      val hasSession = supabase.auth.currentSessionOrNull() != null
+      NavigationState.currentPage = if (hasSession) "escaner" else "Registro"
+  }
+  ```
+- Without `enableLifecycleCallbacks = false`, Auth clears session when app goes to background
 
 ### Carbon Footprint from API
 - **Path**: `product.ecoscore_data.agribalyse.co2_total` (kg CO₂/kg)

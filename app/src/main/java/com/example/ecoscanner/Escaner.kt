@@ -34,7 +34,8 @@ fun Escaner(
     onOpenCamera: () -> Unit,
     onClickHistorial: () -> Unit = {},
     onClickCerrarSesion: () -> Unit = {},
-    onClickLimpiarHistorial: () -> Unit = {}
+    onClickLimpiarHistorial: () -> Unit = {},
+    onClickPoliticaPrivacidad: () -> Unit = {}
 ) {
     ModalNavigationDrawer(
         drawerContent = {
@@ -95,6 +96,17 @@ fun Escaner(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Limpiar Historial")
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    NavigationDrawerItem(
+                        label = { Text("Política de Privacidad") },
+                        selected = false,
+                        onClick = { onClickPoliticaPrivacidad() },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MossGreen.copy(alpha = 0.3f)
+                        )
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
